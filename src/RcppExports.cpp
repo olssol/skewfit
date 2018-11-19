@@ -67,6 +67,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cPava0
+NumericVector cPava0(NumericVector y, NumericVector w);
+RcppExport SEXP _skewfit_cPava0(SEXP ySEXP, SEXP wSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type w(wSEXP);
+    rcpp_result_gen = Rcpp::wrap(cPava0(y, w));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cPava
 NumericVector cPava(NumericVector y, NumericVector w);
 RcppExport SEXP _skewfit_cPava(SEXP ySEXP, SEXP wSEXP) {
@@ -98,6 +110,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_cSlm", (DL_FUNC) &_skewfit_cSlm, 2},
     {"_skewfit_cEMMdl3", (DL_FUNC) &_skewfit_cEMMdl3, 8},
     {"_skewfit_cEMMdl4", (DL_FUNC) &_skewfit_cEMMdl4, 9},
+    {"_skewfit_cPava0", (DL_FUNC) &_skewfit_cPava0, 2},
     {"_skewfit_cPava", (DL_FUNC) &_skewfit_cPava, 2},
     {"_skewfit_cUfit", (DL_FUNC) &_skewfit_cUfit, 3},
     {NULL, NULL, 0}

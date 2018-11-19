@@ -2,7 +2,13 @@
 #include <Rcpp.h>
 #include <Rmath.h>
 
+extern "C" {
+  void hello_();
+}
 
+extern "C" {
+  void pava_(double *y, double *w, double *kt, const int n); 
+}
 
 using namespace Rcpp;
 
@@ -10,7 +16,7 @@ using namespace Rcpp;
 
 // PAVA algorithm
 // [[Rcpp::export]]
-NumericVector cPava(NumericVector y, NumericVector w) {
+NumericVector cPava0(NumericVector y, NumericVector w) {
 
   int n = y.size();
   std::vector<int> kt(n);
@@ -56,6 +62,17 @@ NumericVector cPava(NumericVector y, NumericVector w) {
 
   return(y);
 }
+
+// [[Rcpp::export]]
+NumericVector cPava(NumericVector y, NumericVector w) {
+  int n = y.size();
+  NumericVector yy = clone(y), ww = clone(w);
+  NumericVector kt(n);
+
+  pava_(yy.begin(), ww.begin(), kt.begin(), n);
+  return(yy);
+}
+
 
 // UFIT
 // [[Rcpp::export]]

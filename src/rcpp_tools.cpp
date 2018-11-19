@@ -3,6 +3,8 @@
 
 using namespace Rcpp;
 
+List cUfit(NumericVector y, NumericVector x, int unimodal);
+
 // [[Rcpp::plugins("cpp11")]]
 
 
