@@ -3,20 +3,24 @@
 #include <Rmath.h>
 
 extern "C" {
-  void hello_();
+  void pava_(double *y, double *w, double *kt, int *n); 
 }
 
 extern "C" {
-  void pava_(double *y, double *w, double *kt, const int n); 
+  void ufit_(double *xk, double *wk, double *xmode,
+             double *x,  double *w,  double *mse,
+             double *x1, double *w1, double *x2,
+             double *w2, double *ind, double *kt,
+             int *n, int *goof);
 }
 
 using namespace Rcpp;
 
 // [[Rcpp::plugins("cpp11")]]
 
-// PAVA algorithm
+// // PAVA algorithm
 // [[Rcpp::export]]
-NumericVector cPava0(NumericVector y, NumericVector w) {
+NumericVector cPava(NumericVector y, NumericVector w) {
 
   int n = y.size();
   std::vector<int> kt(n);
@@ -64,32 +68,46 @@ NumericVector cPava0(NumericVector y, NumericVector w) {
 }
 
 // [[Rcpp::export]]
-NumericVector cPava(NumericVector y, NumericVector w) {
+NumericVector FPava(NumericVector y, NumericVector w) {
   int n = y.size();
-  NumericVector yy = clone(y), ww = clone(w);
   NumericVector kt(n);
-
-  pava_(yy.begin(), ww.begin(), kt.begin(), n);
-  return(yy);
+  pava_(y.begin(), w.begin(), kt.begin(), &n);
+  return(y);
 }
 
 
-// UFIT
 // [[Rcpp::export]]
-List cUfit(NumericVector y, NumericVector x, int unimodal) {
+List FUfit(NumericVector y, NumericVector w) {
+  int n = y.size();
+  NumericVector x0(n), w0(n), x1(n), w1(n), x2(n), w2(n), ind(n), kt(n);
+  double xmode = -1, mse;
+  int goof = 1;
+
+  ufit_(y.begin(),  w.begin(),  &xmode, x0.begin(), w0.begin(), &mse,
+        x1.begin(), w1.begin(), x2.begin(), w2.begin(),
+        ind.begin(), kt.begin(), &n, &goof);
+
+  List rst = List::create(_["ai"] = x0,
+                          _["mode"] = xmode);
+  return(rst);
+}
+
+// Iso functions 
+// [[Rcpp::export]]
+List cIso(NumericVector y, int unimodal) {
   List rst(2);
   NumericVector ai;
   double mode;
 
   Function uf("get.isoreg.ufit");
+  NumericVector w(y.size(), 1);
 
   if (0 == unimodal) {
-    NumericVector w(y.size(), 1);
     ai   = cPava(y, w);
     mode = NA_REAL;
     rst  = List::create(_["ai"] = ai, _["mode"] = mode);
   } else {
-    rst = uf(_["y"] = y, _["x"] = x);
+    rst  = FUfit(y, w);
   }
 
   return(rst);

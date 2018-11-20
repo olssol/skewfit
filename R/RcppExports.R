@@ -13,19 +13,23 @@ cEMMdl3 <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {
     .Call(`_skewfit_cEMMdl3`, init_pa, init_ai, y, x, z, unimodal, max_steps, tol)
 }
 
-cEMMdl4 <- function(init_pa, init_ai, init_ci, y, x, z, unimodal, max_steps, tol) {
-    .Call(`_skewfit_cEMMdl4`, init_pa, init_ai, init_ci, y, x, z, unimodal, max_steps, tol)
-}
-
-cPava0 <- function(y, w) {
-    .Call(`_skewfit_cPava0`, y, w)
+cEMMdl4 <- function(pa, ai, ci, y, x, z, unimodal, max_steps, tol) {
+    .Call(`_skewfit_cEMMdl4`, pa, ai, ci, y, x, z, unimodal, max_steps, tol)
 }
 
 cPava <- function(y, w) {
     .Call(`_skewfit_cPava`, y, w)
 }
 
-cUfit <- function(y, x, unimodal) {
-    .Call(`_skewfit_cUfit`, y, x, unimodal)
+FPava <- function(y, w) {
+    .Call(`_skewfit_FPava`, y, w)
+}
+
+FUfit <- function(y, w) {
+    .Call(`_skewfit_FUfit`, y, w)
+}
+
+cIso <- function(y, unimodal) {
+    .Call(`_skewfit_cIso`, y, unimodal)
 }
 
