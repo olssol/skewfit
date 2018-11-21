@@ -5,6 +5,17 @@
 
 using namespace Rcpp;
 
+// apnorm
+double apnorm(double u);
+RcppExport SEXP _skewfit_apnorm(SEXP uSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type u(uSEXP);
+    rcpp_result_gen = Rcpp::wrap(apnorm(u));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cGetEw
 NumericMatrix cGetEw(NumericVector x, double eta, double sig2);
 RcppExport SEXP _skewfit_cGetEw(SEXP xSEXP, SEXP etaSEXP, SEXP sig2SEXP) {
@@ -117,6 +128,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_skewfit_apnorm", (DL_FUNC) &_skewfit_apnorm, 1},
     {"_skewfit_cGetEw", (DL_FUNC) &_skewfit_cGetEw, 3},
     {"_skewfit_cSlm", (DL_FUNC) &_skewfit_cSlm, 2},
     {"_skewfit_cEMMdl3", (DL_FUNC) &_skewfit_cEMMdl3, 8},

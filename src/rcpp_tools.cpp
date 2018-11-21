@@ -8,6 +8,21 @@ List cIso(NumericVector y, int unimodal);
 // [[Rcpp::plugins("cpp11")]]
 
 
+//approximate pnorm from Aludaat and Alodat (2008)
+// [[Rcpp::export]]
+double apnorm(double u) {
+  int    sgn;
+  double rst;
+  if (u >= 0) {
+    sgn = 1;
+  } else {
+    sgn = -1;
+  }
+
+  rst = 0.5 + sgn * 0.5 * sqrt(1 - exp(-sqrt(M_PI/8)*pow(u,2)));
+  return(rst);
+}
+
 // E-Step
 // [[Rcpp::export]]
 NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
@@ -21,6 +36,13 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
   for (i = 0; i < x.size(); i++) {
     mu  = eta * x[i] / es;
     ut  = - mu / tau;
+
+    if (ut < -4) {
+      ut = -4.0;
+    } else if (ut > 7) {
+      ut = 7.0;
+    }
+
     p   = R::dnorm(ut, 0, 1, 0) / (1 - R::pnorm(ut, 0, 1, 1, 0));
     ew  = mu + tau * p;
     ew2 = pow(tau, 2) * (1 + ut * p - pow(p,2)) + pow(ew, 2);
