@@ -17,8 +17,8 @@ cEMMdl3 <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {
     .Call(`_skewfit_cEMMdl3`, init_pa, init_ai, y, x, z, unimodal, max_steps, tol)
 }
 
-cEMMdl4 <- function(pa, ai, ci, y, x, z, unimodal, max_steps, tol) {
-    .Call(`_skewfit_cEMMdl4`, pa, ai, ci, y, x, z, unimodal, max_steps, tol)
+cEMMdl4 <- function(pa, ai, y, x, z, unimodal, usez, max_steps, tol) {
+    .Call(`_skewfit_cEMMdl4`, pa, ai, y, x, z, unimodal, usez, max_steps, tol)
 }
 
 cPava <- function(y, w) {

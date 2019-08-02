@@ -30,19 +30,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // cSlm
-double cSlm(NumericVector y, NumericVector x);
+NumericVector cSlm(NumericVector y, NumericMatrix x);
 RcppExport SEXP _skewfit_cSlm(SEXP ySEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(cSlm(y, x));
     return rcpp_result_gen;
 END_RCPP
 }
 // cEMMdl3
-List cEMMdl3(NumericVector init_pa, NumericVector init_ai, NumericVector y, NumericVector x, NumericVector z, int unimodal, int max_steps, double tol);
+List cEMMdl3(NumericVector init_pa, NumericVector init_ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int max_steps, double tol);
 RcppExport SEXP _skewfit_cEMMdl3(SEXP init_paSEXP, SEXP init_aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -51,7 +51,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type init_ai(init_aiSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type z(zSEXP);
     Rcpp::traits::input_parameter< int >::type unimodal(unimodalSEXP);
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
@@ -60,21 +60,21 @@ BEGIN_RCPP
 END_RCPP
 }
 // cEMMdl4
-List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector ci, NumericVector y, NumericVector x, NumericVector z, int unimodal, int max_steps, double tol);
-RcppExport SEXP _skewfit_cEMMdl4(SEXP paSEXP, SEXP aiSEXP, SEXP ciSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
+List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez, int max_steps, double tol);
+RcppExport SEXP _skewfit_cEMMdl4(SEXP paSEXP, SEXP aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type pa(paSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type ai(aiSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type ci(ciSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type z(zSEXP);
     Rcpp::traits::input_parameter< int >::type unimodal(unimodalSEXP);
+    Rcpp::traits::input_parameter< int >::type usez(usezSEXP);
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(cEMMdl4(pa, ai, ci, y, x, z, unimodal, max_steps, tol));
+    rcpp_result_gen = Rcpp::wrap(cEMMdl4(pa, ai, y, x, z, unimodal, usez, max_steps, tol));
     return rcpp_result_gen;
 END_RCPP
 }

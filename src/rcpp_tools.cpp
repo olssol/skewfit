@@ -8,7 +8,7 @@ List cIso(NumericVector y, int unimodal);
 // [[Rcpp::plugins("cpp11")]]
 
 
-//approximate pnorm from Aludaat and Alodat (2008)
+// approximate pnorm from Aludaat and Alodat (2008)
 // [[Rcpp::export]]
 double apnorm(double u) {
   int    sgn;
@@ -56,26 +56,33 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
 
 // Simple Linear regression without intercept
 // [[Rcpp::export]]
-double cSlm(NumericVector y, NumericVector x) {
-  int n = y.size(), i;
+NumericVector cSlm(NumericVector y, NumericMatrix x) {
+  int    n = y.size(), i;
   double ysum = 0, xsum = 0;
   double xy = 0, xx = 0;
-  double beta;
 
-  for (i = 0; i < n; i++) {
-    ysum += y[i];
-    xsum += x[i];
+  int np = x.ncol();
+  NumericVector beta(np);
+
+  if (1 == np) {
+    for (i = 0; i < n; i++) {
+      ysum += y[i];
+      xsum += x[i];
+    }
+
+    ysum = ysum / n;
+    xsum = xsum / n;
+
+    for (i = 0; i < n; i++) {
+      xy += (x[i] - xsum) * (y[i] - ysum);
+      xx += pow(x[i] - xsum, 2);
+    }
+
+    beta[0] = xy / xx;
+  } else {
+    Function coef("get.lm.coeff");
+    beta = coef(y, x);
   }
-
-  ysum = ysum / n;
-  xsum = xsum / n;
-
-  for (i = 0; i < n; i++) {
-    xy += (x[i] - xsum) * (y[i] - ysum);
-    xx += pow(x[i] - xsum, 2);
-  }
-
-  beta = xy / xx;
 
   return(beta);
 } 
@@ -100,10 +107,10 @@ double cSlm(NumericVector y, NumericVector x) {
 //   return(rst);
 // }
 
-// EM Model 3 with Skewed Error
+// EM Model 3 with Normal Error
 // [[Rcpp::export]]
 List cEMMdl3(NumericVector init_pa, NumericVector init_ai, 
-             NumericVector y, NumericVector x, NumericVector z, int unimodal, 
+             NumericVector y, NumericVector x, NumericMatrix z, int unimodal, 
              int max_steps, double tol) {
 
   NumericVector pa = clone(init_pa);
@@ -112,20 +119,26 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
   NumericVector last_pa(init_pa.size());
   NumericVector last_ai(init_pa.size());
 
-  int           n = y.size();
-  NumericVector ybz(n), yai(n);
+  int           n  = y.size();
+  int           nz = z.ncol(); 
+  NumericVector ybz(n), yai(n), beta(nz);
+  NumericVector residual(n);
 
   List          fitrst(2), rst(2);
-  double        beta, mode, sig2, last_diff = 10000;
-  int           inx = 0, i;
-  double        tmp1;
+  double        mode, sig2, last_diff = 10000;
+  int           inx = 0, i, j;
+  double        tmp1, tmp2;
 
   while(inx < max_steps & last_diff > tol) {
     last_pa = clone(pa);
     last_ai = clone(ai);
 
     for (i = 0; i < n; i++) {
-      ybz[i] = y[i] - pa[0] * z[i];
+      tmp2 = 0;
+      for (j = 0; j < nz; j++) {
+        tmp2 += pa[j] * z(i,j);
+      }
+      ybz[i] = y[i] - tmp2;
     }
 
     fitrst = cIso(ybz, unimodal);
@@ -133,7 +146,7 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
     if (1 == unimodal) {
       mode = x[as<int>(fitrst[1])-1];
     } else {
-      mode = pa[2];
+      mode = pa[nz+1];
     }
 
     for (i = 0; i < n; i++) {
@@ -144,16 +157,25 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
 
     tmp1 = 0;
     for (i = 0; i < n; i++) {
-      tmp1 += pow(yai[i] - beta * z[i], 2);
+      tmp2 = 0;
+      for (j = 0; j < nz; j++) {
+        tmp2 += beta[j] * z(i,j);
+      }
+      residual[i] = yai[i] - tmp2;
+
+      tmp1 += pow(residual[i], 2);
     }
     sig2 = tmp1 / n;
 
-    pa[0] = beta;
-    pa[1] = sig2;
-    pa[2] = mode;
+    //return parameter
+    for (i = 0; i < nz; i++) {
+      pa[i] = beta[i];
+    }
+    pa[nz]   = sig2;
+    pa[nz+1] = mode;
 
     last_diff = 0;
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < nz+2; i++) {
       last_diff = fmax(last_diff, fabs(pa[i] - last_pa[i]));
     }
 
@@ -165,9 +187,12 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
   }
 
   if (last_diff > tol) {
-    rst = List::create(NA_REAL, NA_REAL);
+    rst = List::create(NA_REAL, NA_REAL, NA_REAL);
   } else {
-    rst = List::create(_["mle.pa"] = pa, _["mle.ai"] = ai);
+    rst = List::create(_["mle.pa"]   = pa,
+                       _["mle.ai"]   = ai,
+                       _["residual"] = residual
+                       );
   }
 
   return(rst);
@@ -175,35 +200,57 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
 
 // EM Model 4 with Skewed Error
 // [[Rcpp::export]]
-List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector ci,
-             NumericVector y, NumericVector x, NumericVector z, int unimodal, 
+List cEMMdl4(NumericVector pa, NumericVector ai,
+             NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez,
              int max_steps, double tol) {
 
   NumericVector last_pa(pa.size());
   NumericVector last_ai(ai.size());
 
-  int           n = y.size();
-  NumericVector yaieta(n), yzeta(n);
+  int           n  = y.size(), nz = z.ncol();
+  NumericVector yaieta(n), yzeta(n), beta(nz);
   NumericMatrix ew(n, 2);
 
   List          fitrst(2), rst(2);
-  double        beta, mode, eta, sig2, last_diff = 10000;
+  double        mode, eta, sig2, last_diff = 10000;
   double        tmp1, tmp2;
-  int           inx = 0, i;
+  int           inx = 0, i, j;
+
+  if (0 == usez) {
+    nz = 0;
+  }
+
+  //initial ci
+  NumericVector ci(n);
+  for (i = 0; i < n; i++) {
+    tmp1 = 0;
+    for (j = 0; j < nz; j++) {
+      tmp1 += pa[j] * z(i,j);
+    }
+
+    ci[i] = y[i] - ai[i] - tmp1;
+  }
 
   while(inx < max_steps & last_diff > tol) {
     last_pa = clone(pa);
     last_ai = clone(ai);
 
-    ew = cGetEw(ci, pa[1], pa[2]);
+    ew = cGetEw(ci, pa[nz], pa[nz+1]);
     for (i = 0; i < n; i++) {
-      yaieta[i] = y[i] - ai[i] - pa[1] * ew(i,0);
+      yaieta[i] = y[i] - ai[i] - pa[nz] * ew(i,0);
     }
 
-    beta = cSlm(yaieta, z);
+    if (0 < nz) {
+      beta = cSlm(yaieta, z);
+    }
 
     for (i = 0; i < n; i++) {
-      yzeta[i] = y[i] - beta * z[i] - pa[1] * ew(i,0);
+      tmp1 = 0;
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[j] * z(i,j);
+        }
+
+      yzeta[i] = y[i] - tmp1 - pa[nz] * ew(i,0);
     }
 
     fitrst = cIso(yzeta, unimodal);
@@ -211,11 +258,15 @@ List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector ci,
     if (1 == unimodal) {
       mode = x[as<int>(fitrst[1])-1];
     } else {
-      mode = pa[3];
+      mode = pa[nz+2];
     }
 
     for (i = 0; i < n; i++) {
-      ci[i] = y[i] - ai[i] - beta * z[i];
+      tmp1 = 0;
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[j] * z(i,j);
+      }
+      ci[i] = y[i] - ai[i] - tmp1;
     }
 
     tmp1 = 0;
@@ -232,13 +283,17 @@ List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector ci,
     }
     sig2 = tmp1 / n;
 
-    pa[0] = beta;
-    pa[1] = eta;
-    pa[2] = sig2;
-    pa[3] = mode;
+    //return parameter
+    for (i = 0; i < nz; i++) {
+      pa[i] = beta[i];
+    }
+
+    pa[nz]   = eta;
+    pa[nz+1] = sig2;
+    pa[nz+2] = mode;
 
     last_diff = 0;
-    for (i = 0; i < 3; i++) {
+    for (i = 0; i < nz+3; i++) {
       last_diff = fmax(last_diff, fabs(pa[i] - last_pa[i]));
     }
 
@@ -250,9 +305,11 @@ List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector ci,
   }
 
   if (last_diff > tol) {
-    rst = List::create(NA_REAL, NA_REAL);
+    rst = List::create(NA_REAL, NA_REAL, NA_REAL);
   } else {
-    rst = List::create(_["mle.pa"] = pa, _["mle.ai"] = ai);
+    rst = List::create(_["mle.pa"]   = pa,
+                       _["mle.ai"]   = ai,
+                       _["residual"] = ci);
   }
 
   return(rst);
