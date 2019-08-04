@@ -9,8 +9,20 @@ cGetEw <- function(x, eta, sig2) {
     .Call(`_skewfit_cGetEw`, x, eta, sig2)
 }
 
+cSlm0 <- function(y, x) {
+    .Call(`_skewfit_cSlm0`, y, x)
+}
+
+cSlm1 <- function(y, x) {
+    .Call(`_skewfit_cSlm1`, y, x)
+}
+
 cSlm <- function(y, x) {
     .Call(`_skewfit_cSlm`, y, x)
+}
+
+cEMMdl2 <- function(pa, y, x, z, max_steps, tol) {
+    .Call(`_skewfit_cEMMdl2`, pa, y, x, z, max_steps, tol)
 }
 
 cEMMdl3 <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {

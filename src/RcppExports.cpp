@@ -29,6 +29,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cSlm0
+double cSlm0(NumericVector y, NumericVector x);
+RcppExport SEXP _skewfit_cSlm0(SEXP ySEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cSlm0(y, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cSlm1
+double cSlm1(NumericVector y, NumericVector x);
+RcppExport SEXP _skewfit_cSlm1(SEXP ySEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(cSlm1(y, x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cSlm
 NumericVector cSlm(NumericVector y, NumericMatrix x);
 RcppExport SEXP _skewfit_cSlm(SEXP ySEXP, SEXP xSEXP) {
@@ -38,6 +62,22 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
     rcpp_result_gen = Rcpp::wrap(cSlm(y, x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cEMMdl2
+List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z, int max_steps, double tol);
+RcppExport SEXP _skewfit_cEMMdl2(SEXP paSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type pa(paSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type z(zSEXP);
+    Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(cEMMdl2(pa, y, x, z, max_steps, tol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -130,7 +170,10 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_apnorm", (DL_FUNC) &_skewfit_apnorm, 1},
     {"_skewfit_cGetEw", (DL_FUNC) &_skewfit_cGetEw, 3},
+    {"_skewfit_cSlm0", (DL_FUNC) &_skewfit_cSlm0, 2},
+    {"_skewfit_cSlm1", (DL_FUNC) &_skewfit_cSlm1, 2},
     {"_skewfit_cSlm", (DL_FUNC) &_skewfit_cSlm, 2},
+    {"_skewfit_cEMMdl2", (DL_FUNC) &_skewfit_cEMMdl2, 6},
     {"_skewfit_cEMMdl3", (DL_FUNC) &_skewfit_cEMMdl3, 8},
     {"_skewfit_cEMMdl4", (DL_FUNC) &_skewfit_cEMMdl4, 9},
     {"_skewfit_cPava", (DL_FUNC) &_skewfit_cPava, 2},

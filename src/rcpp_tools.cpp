@@ -54,35 +54,55 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
   return(rst);
 }
 
-// Simple Linear regression without intercept
+//Simple linear regression without intercept
 // [[Rcpp::export]]
-NumericVector cSlm(NumericVector y, NumericMatrix x) {
+double cSlm0(NumericVector y, NumericVector x) {
   int    n = y.size(), i;
   double ysum = 0, xsum = 0;
   double xy = 0, xx = 0;
 
+  for (i = 0; i < n; i++) {
+    ysum += y[i];
+    xsum += x[i];
+  }
+
+  ysum = ysum / n;
+  xsum = xsum / n;
+
+  for (i = 0; i < n; i++) {
+    xy += (x[i] - xsum) * (y[i] - ysum);
+    xx += pow(x[i] - xsum, 2);
+  }
+
+  return(xy / xx);
+}
+
+// [[Rcpp::export]]
+double cSlm1(NumericVector y, NumericVector x) {
+  NumericVector beta(1);
+  Function coef("get.lm.coeff");
+
+  beta = coef(y, x);
+  return(beta(0));
+}
+
+
+// Simple Linear regression without intercept
+// [[Rcpp::export]]
+NumericVector cSlm(NumericVector y, NumericMatrix x) {
+
   int np = x.ncol();
   NumericVector beta(np);
 
-  if (1 == np) {
-    for (i = 0; i < n; i++) {
-      ysum += y[i];
-      xsum += x[i];
-    }
+  Function coef("get.lm.coeff");
+  beta = coef(y, x);
 
-    ysum = ysum / n;
-    xsum = xsum / n;
-
-    for (i = 0; i < n; i++) {
-      xy += (x[i] - xsum) * (y[i] - ysum);
-      xx += pow(x[i] - xsum, 2);
-    }
-
-    beta[0] = xy / xx;
-  } else {
-    Function coef("get.lm.coeff");
-    beta = coef(y, x);
-  }
+  // if (1 == np) {
+  //   beta[0] = cSlm0(y, x(_,1));
+  // } else {
+  //   Function coef("get.lm.coeff");
+  //   beta = coef(y, x);
+  // }
 
   return(beta);
 } 
@@ -106,6 +126,115 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 
 //   return(rst);
 // }
+
+// EM Model 2: parametric alpha(x) with Skewed Error
+// [[Rcpp::export]]
+List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z,
+             int max_steps, double tol) {
+
+  NumericVector last_pa(pa.size());
+  int           n  = y.size(), nz = z.ncol();
+  NumericVector yeta(n), yzeta(n), beta(1+nz), alpha(1);
+  NumericMatrix ew(n, 2);
+  NumericVector ci(n);
+
+  Function      coef("get.lm.coeff.2");
+  Function      coef0("get.lm.coeff");
+
+  List          rst(2);
+  double        eta, sig2, last_diff = 10000;
+  double        tmp1, tmp2;
+  int           inx = 0, i, j;
+
+
+  //initial ci
+  for (i = 0; i < n; i++) {
+    tmp1 = pa[0] + pa[3+nz] * x[i];
+    for (j = 0; j < nz; j++) {
+      tmp1 += pa[1+j] * z(i,j);
+    }
+
+    ci[i] = y[i] - tmp1;
+  }
+
+  while (inx < max_steps & last_diff > tol) {
+    last_pa = clone(pa);
+    ew      = cGetEw(ci, pa[1+nz], pa[2+nz]);
+
+    for (i = 0; i < n; i++) {
+      yeta[i] = y[i] - pa[3+nz] * x[i] - pa[1+nz] * ew(i,0);
+    }
+
+    // get intercept and coeff for z
+    beta = coef(yeta, z);
+
+    //get alpha
+    for (i = 0; i < n; i++) {
+      tmp1 = beta[0];
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[1+j] * z(i,j);
+      }
+
+      yzeta[i] = y[i] - tmp1 - pa[1+nz] * ew(i,0);
+    }
+
+    //Rcout << yzeta << "\n";
+
+    alpha = coef0(yzeta, x);
+    if (alpha[0] < 0)
+      alpha[0] = 0;
+
+    //update ci
+    for (i = 0; i < n; i++) {
+      tmp1 = beta[0] + alpha[0] * x[i];;
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[1+j] * z(i,j);
+      }
+      ci[i] = y[i] - tmp1;
+    }
+
+    tmp1 = 0;
+    tmp2 = 0;
+    for (i = 0; i < n; i++) {
+      tmp1 += ci[i] * ew(i,0);
+      tmp2 += ew(i,1);
+    }
+    eta = tmp1 / tmp2;
+
+    tmp1 = 0;
+    for (i = 0; i < n; i++) {
+      tmp1 += pow(ci[i], 2) + pow(eta, 2) * ew(i,1) - 2 * eta * ci[i] * ew(i,0);
+    }
+    sig2 = tmp1 / n;
+
+    //return parameter
+    for (i = 0; i < beta.size(); i++) {
+      pa[i] = beta[i];
+    }
+
+    pa[1+nz] = eta;
+    pa[2+nz] = sig2;
+    pa[3+nz] = alpha[0];
+
+    last_diff = 0;
+    for (i = 0; i < pa.size(); i++) {
+      last_diff = fmax(last_diff, fabs(pa[i] - last_pa[i]));
+    }
+
+    inx++;
+  }
+
+  if (last_diff > tol) {
+    rst = List::create(NA_REAL, NA_REAL);
+  } else {
+    rst = List::create(_["mle.pa"]   = pa,
+                       _["residual"] = ci);
+  }
+
+  return(rst);
+}
+
+
 
 // EM Model 3 with Normal Error
 // [[Rcpp::export]]
@@ -154,7 +283,6 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
     }
 
     beta = cSlm(yai, z);
-
     tmp1 = 0;
     for (i = 0; i < n; i++) {
       tmp2 = 0;
