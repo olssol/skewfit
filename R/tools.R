@@ -46,6 +46,10 @@ get.lm.posx <- function(y, x, z) {
 #'
 #'
 get.lm.coeff <- function(y, x) {
+    ## keep for pseudo x
+    if (all(0 == x))
+        return(0)
+
     lrs <- lm(y ~ -1 + x);
     coefficients(lrs);
 }
@@ -54,4 +58,3 @@ get.lm.coeff.2 <- function(y, x) {
     lrs <- lm(y ~ x);
     coefficients(lrs);
 }
-

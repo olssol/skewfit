@@ -32,7 +32,7 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
   double tau = sqrt(sig2/es);
   double mu, ut, p, ew, ew2;
   int    i;
-  
+
   for (i = 0; i < x.size(); i++) {
     mu  = eta * x[i] / es;
     ut  = - mu / tau;
@@ -105,7 +105,7 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
   // }
 
   return(beta);
-} 
+}
 
 
 // double cGetSnLpdf(NumericVector u, double eta, double mu, double sigma) {
@@ -128,6 +128,7 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 // }
 
 // EM Model 2: parametric alpha(x) with Skewed Error
+// alpha(x) =  alpha * x where alpha > 0
 // [[Rcpp::export]]
 List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z,
              int max_steps, double tol) {
@@ -179,14 +180,13 @@ List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z
     }
 
     //Rcout << yzeta << "\n";
-
     alpha = coef0(yzeta, x);
     if (alpha[0] < 0)
       alpha[0] = 0;
 
     //update ci
     for (i = 0; i < n; i++) {
-      tmp1 = beta[0] + alpha[0] * x[i];;
+      tmp1 = beta[0] + alpha[0] * x[i];
       for (j = 0; j < nz; j++) {
         tmp1 += beta[1+j] * z(i,j);
       }
@@ -235,11 +235,10 @@ List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z
 }
 
 
-
 // EM Model 3 with Normal Error
 // [[Rcpp::export]]
-List cEMMdl3(NumericVector init_pa, NumericVector init_ai, 
-             NumericVector y, NumericVector x, NumericMatrix z, int unimodal, 
+List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
+             NumericVector y, NumericVector x, NumericMatrix z, int unimodal,
              int max_steps, double tol) {
 
   NumericVector pa = clone(init_pa);
@@ -249,7 +248,7 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
   NumericVector last_ai(init_pa.size());
 
   int           n  = y.size();
-  int           nz = z.ncol(); 
+  int           nz = z.ncol();
   NumericVector ybz(n), yai(n), beta(nz);
   NumericVector residual(n);
 
