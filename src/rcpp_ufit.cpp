@@ -3,7 +3,7 @@
 #include <Rmath.h>
 
 extern "C" {
-  void pava_(double *y, double *w, double *kt, int *n); 
+  void pava_(double *y, double *w, double *kt, int *n);
 }
 
 extern "C" {
@@ -39,7 +39,7 @@ NumericVector cPava(NumericVector y, NumericVector w) {
   while (0 == same) {
     same = 1;
     for (i = 1; i < n; i++) {
-      if (y[i-1] <= y[i]) 
+      if (y[i-1] <= y[i])
         continue;
 
       k1 = kt[i];
@@ -92,14 +92,14 @@ List FUfit(NumericVector y, NumericVector w) {
   return(rst);
 }
 
-// Iso functions 
+// Iso functions
 // [[Rcpp::export]]
 List cIso(NumericVector y, int unimodal) {
   List rst(2);
   NumericVector ai;
   double mode;
 
-  Function uf("get.isoreg.ufit");
+  // Function uf("get.isoreg.ufit");
   NumericVector w(y.size(), 1);
 
   if (0 == unimodal) {
@@ -112,4 +112,3 @@ List cIso(NumericVector y, int unimodal) {
 
   return(rst);
 }
-

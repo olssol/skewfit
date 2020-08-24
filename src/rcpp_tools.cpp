@@ -1,4 +1,3 @@
-
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -19,7 +18,7 @@ double apnorm(double u) {
     sgn = -1;
   }
 
-  rst = 0.5 + sgn * 0.5 * sqrt(1 - exp(-sqrt(M_PI/8)*pow(u,2)));
+  rst = 0.5 + sgn * 0.5 * sqrt(1 - exp(-sqrt(M_PI / 8) * pow(u, 2)));
   return(rst);
 }
 
@@ -80,7 +79,7 @@ double cSlm0(NumericVector y, NumericVector x) {
 // [[Rcpp::export]]
 double cSlm1(NumericVector y, NumericVector x) {
   NumericVector beta(1);
-  Function coef("get.lm.coeff");
+  Function coef("get_lm_coeff");
 
   beta = coef(y, x);
   return(beta(0));
@@ -94,7 +93,7 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
   int np = x.ncol();
   NumericVector beta(np);
 
-  Function coef("get.lm.coeff");
+  Function coef("get_lm_coeff");
   beta = coef(y, x);
 
   // if (1 == np) {
@@ -127,11 +126,12 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 //   return(rst);
 // }
 
+// cEMMdl2
 // EM Model 2: parametric alpha(x) with Skewed Error
 // alpha(x) =  alpha * x where alpha > 0
 // [[Rcpp::export]]
-List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z,
-             int max_steps, double tol) {
+List fit_para_skew(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z,
+                   int max_steps, double tol) {
 
   NumericVector last_pa(pa.size());
   int           n  = y.size(), nz = z.ncol();
@@ -139,8 +139,8 @@ List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z
   NumericMatrix ew(n, 2);
   NumericVector ci(n);
 
-  Function      coef("get.lm.coeff.2");
-  Function      coef0("get.lm.coeff");
+  Function      coef("get_lm_coeff_2");
+  Function      coef0("get_lm_coeff");
 
   List          rst(2);
   double        eta, sig2, last_diff = 10000;
@@ -234,12 +234,12 @@ List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z
   return(rst);
 }
 
-
+// cEMMdl3
 // EM Model 3 with Normal Error
 // [[Rcpp::export]]
-List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
-             NumericVector y, NumericVector x, NumericMatrix z, int unimodal,
-             int max_steps, double tol) {
+List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
+                  NumericVector y, NumericVector x, NumericMatrix z, int unimodal,
+                  int max_steps, double tol) {
 
   NumericVector pa = clone(init_pa);
   NumericVector ai = clone(init_ai);
@@ -325,11 +325,12 @@ List cEMMdl3(NumericVector init_pa, NumericVector init_ai,
   return(rst);
 }
 
+// cEMMdl4
 // EM Model 4 with Skewed Error
 // [[Rcpp::export]]
-List cEMMdl4(NumericVector pa, NumericVector ai,
-             NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez,
-             int max_steps, double tol) {
+List fit_iso_skew(NumericVector pa, NumericVector ai,
+                  NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez,
+                  int max_steps, double tol) {
 
   NumericVector last_pa(pa.size());
   NumericVector last_ai(ai.size());

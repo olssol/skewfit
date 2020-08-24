@@ -65,9 +65,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cEMMdl2
-List cEMMdl2(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z, int max_steps, double tol);
-RcppExport SEXP _skewfit_cEMMdl2(SEXP paSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
+// fit_para_skew
+List fit_para_skew(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z, int max_steps, double tol);
+RcppExport SEXP _skewfit_fit_para_skew(SEXP paSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -77,13 +77,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type z(zSEXP);
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(cEMMdl2(pa, y, x, z, max_steps, tol));
+    rcpp_result_gen = Rcpp::wrap(fit_para_skew(pa, y, x, z, max_steps, tol));
     return rcpp_result_gen;
 END_RCPP
 }
-// cEMMdl3
-List cEMMdl3(NumericVector init_pa, NumericVector init_ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int max_steps, double tol);
-RcppExport SEXP _skewfit_cEMMdl3(SEXP init_paSEXP, SEXP init_aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
+// fit_iso_norm
+List fit_iso_norm(NumericVector init_pa, NumericVector init_ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int max_steps, double tol);
+RcppExport SEXP _skewfit_fit_iso_norm(SEXP init_paSEXP, SEXP init_aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -95,13 +95,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type unimodal(unimodalSEXP);
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(cEMMdl3(init_pa, init_ai, y, x, z, unimodal, max_steps, tol));
+    rcpp_result_gen = Rcpp::wrap(fit_iso_norm(init_pa, init_ai, y, x, z, unimodal, max_steps, tol));
     return rcpp_result_gen;
 END_RCPP
 }
-// cEMMdl4
-List cEMMdl4(NumericVector pa, NumericVector ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez, int max_steps, double tol);
-RcppExport SEXP _skewfit_cEMMdl4(SEXP paSEXP, SEXP aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
+// fit_iso_skew
+List fit_iso_skew(NumericVector pa, NumericVector ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez, int max_steps, double tol);
+RcppExport SEXP _skewfit_fit_iso_skew(SEXP paSEXP, SEXP aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -114,7 +114,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type usez(usezSEXP);
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(cEMMdl4(pa, ai, y, x, z, unimodal, usez, max_steps, tol));
+    rcpp_result_gen = Rcpp::wrap(fit_iso_skew(pa, ai, y, x, z, unimodal, usez, max_steps, tol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -173,9 +173,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_cSlm0", (DL_FUNC) &_skewfit_cSlm0, 2},
     {"_skewfit_cSlm1", (DL_FUNC) &_skewfit_cSlm1, 2},
     {"_skewfit_cSlm", (DL_FUNC) &_skewfit_cSlm, 2},
-    {"_skewfit_cEMMdl2", (DL_FUNC) &_skewfit_cEMMdl2, 6},
-    {"_skewfit_cEMMdl3", (DL_FUNC) &_skewfit_cEMMdl3, 8},
-    {"_skewfit_cEMMdl4", (DL_FUNC) &_skewfit_cEMMdl4, 9},
+    {"_skewfit_fit_para_skew", (DL_FUNC) &_skewfit_fit_para_skew, 6},
+    {"_skewfit_fit_iso_norm", (DL_FUNC) &_skewfit_fit_iso_norm, 8},
+    {"_skewfit_fit_iso_skew", (DL_FUNC) &_skewfit_fit_iso_skew, 9},
     {"_skewfit_cPava", (DL_FUNC) &_skewfit_cPava, 2},
     {"_skewfit_FPava", (DL_FUNC) &_skewfit_FPava, 2},
     {"_skewfit_FUfit", (DL_FUNC) &_skewfit_FUfit, 2},

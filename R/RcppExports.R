@@ -21,16 +21,16 @@ cSlm <- function(y, x) {
     .Call(`_skewfit_cSlm`, y, x)
 }
 
-cEMMdl2 <- function(pa, y, x, z, max_steps, tol) {
-    .Call(`_skewfit_cEMMdl2`, pa, y, x, z, max_steps, tol)
+fit_para_skew <- function(pa, y, x, z, max_steps, tol) {
+    .Call(`_skewfit_fit_para_skew`, pa, y, x, z, max_steps, tol)
 }
 
-cEMMdl3 <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {
-    .Call(`_skewfit_cEMMdl3`, init_pa, init_ai, y, x, z, unimodal, max_steps, tol)
+fit_iso_norm <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {
+    .Call(`_skewfit_fit_iso_norm`, init_pa, init_ai, y, x, z, unimodal, max_steps, tol)
 }
 
-cEMMdl4 <- function(pa, ai, y, x, z, unimodal, usez, max_steps, tol) {
-    .Call(`_skewfit_cEMMdl4`, pa, ai, y, x, z, unimodal, usez, max_steps, tol)
+fit_iso_skew <- function(pa, ai, y, x, z, unimodal, usez, max_steps, tol) {
+    .Call(`_skewfit_fit_iso_skew`, pa, ai, y, x, z, unimodal, usez, max_steps, tol)
 }
 
 cPava <- function(y, w) {
