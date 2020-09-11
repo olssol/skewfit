@@ -21,8 +21,8 @@ cSlm <- function(y, x) {
     .Call(`_skewfit_cSlm`, y, x)
 }
 
-fit_para_skew <- function(pa, y, x, z, max_steps, tol) {
-    .Call(`_skewfit_fit_para_skew`, pa, y, x, z, max_steps, tol)
+fit_para_skew <- function(init_pa, y, x, z, max_steps, tol) {
+    .Call(`_skewfit_fit_para_skew`, init_pa, y, x, z, max_steps, tol)
 }
 
 fit_iso_norm <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {

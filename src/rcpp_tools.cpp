@@ -130,9 +130,10 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 // EM Model 2: parametric alpha(x) with Skewed Error
 // alpha(x) =  alpha * x where alpha > 0
 // [[Rcpp::export]]
-List fit_para_skew(NumericVector pa, NumericVector y, NumericVector x, NumericMatrix z,
+List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
                    int max_steps, double tol) {
 
+  NumericVector pa = clone(init_pa);
   NumericVector last_pa(pa.size());
   int           n  = y.size(), nz = z.ncol();
   NumericVector yeta(n), yzeta(n), beta(1+nz), alpha(1);
