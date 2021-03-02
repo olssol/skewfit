@@ -82,7 +82,7 @@ bs_iso_skew <- function(rst_fit, nbs = 100, seed = NULL, ...) {
         cur_rst <- sf_iso_skew(smp_y, smp_x, as.matrix(smp_z), ...)
 
         cur_ai  <- cur_rst$mle_ai
-        cur_pa  <- cur_rst$pa
+        cur_pa  <- cur_rst$mle_pa
         cur_ai0 <- pred_iso(x, cbind(smp_x, cur_ai))[, 2]
 
         ## append rst
