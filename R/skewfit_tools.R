@@ -18,7 +18,7 @@ get_sn_lpdf <- function(u, eta = 0, mu = 0, sigma = 1) {
 
 #'
 #'
-#'
+#' @export
 get_lm_coeff <- function(y, x) {
     ## keep for pseudo x
     if (all(0 == x))
