@@ -6,6 +6,31 @@ List cIso(NumericVector y, int unimodal);
 
 // [[Rcpp::plugins("cpp11")]]
 
+// rank x in a sorted ascending vector
+// [[Rcpp::export]]
+int rank_x(double x, NumericVector v) {
+  int n = v.size();
+  int l = 0, u = n - 1, cur;
+  int rst;
+
+  if (x <= v[l]) {
+    rst = l;
+  } else if (x >= v[u]) {
+    rst = u;
+  } else {
+    while (l < u - 1) {
+      cur = (l + u)/2;
+      if (x < v[cur]) {
+        u = cur;
+      } else if (x >= v[cur]) {
+        l = cur;
+      }
+    }
+    rst = l;
+  }
+
+  return(rst);
+}
 
 // approximate pnorm from Aludaat and Alodat (2008)
 // [[Rcpp::export]]
@@ -126,9 +151,10 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 //   return(rst);
 // }
 
-// cEMMdl2
-// EM Model 2: parametric alpha(x) with Skewed Error
-// alpha(x) =  alpha * x where alpha > 0
+//' Parametric alpha(x) with Skewed Error
+//'
+//' alpha(x) =  alpha * x where alpha > 0
+//' @export
 // [[Rcpp::export]]
 List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
                    int max_steps, double tol) {
@@ -228,15 +254,16 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
   if (last_diff > tol) {
     rst = List::create(NA_REAL, NA_REAL);
   } else {
-    rst = List::create(_["mle.pa"]   = pa,
+    rst = List::create(_["mle_pa"]   = pa,
                        _["residual"] = ci);
   }
 
   return(rst);
 }
 
-// cEMMdl3
-// EM Model 3 with Normal Error
+//' Isotonic regression with Normal Error
+//'
+//' @export
 // [[Rcpp::export]]
 List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
                   NumericVector y, NumericVector x, NumericMatrix z, int unimodal,
@@ -317,8 +344,8 @@ List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
   if (last_diff > tol) {
     rst = List::create(NA_REAL, NA_REAL, NA_REAL);
   } else {
-    rst = List::create(_["mle.pa"]   = pa,
-                       _["mle.ai"]   = ai,
+    rst = List::create(_["mle_pa"]   = pa,
+                       _["mle_ai"]   = ai,
                        _["residual"] = residual
                        );
   }
@@ -327,7 +354,9 @@ List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
 }
 
 // cEMMdl4
-// EM Model 4 with Skewed Error
+//' Isotonic regression with Skewed Error
+//'
+//' @export
 // [[Rcpp::export]]
 List fit_iso_skew(NumericVector pa, NumericVector ai,
                   NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez,
@@ -434,11 +463,32 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
   }
 
   if (last_diff > tol) {
-    rst = List::create(NA_REAL, NA_REAL, NA_REAL);
+    rst = List::create(NA_REAL, NA_REAL, NA_REAL, NA_REAL);
   } else {
-    rst = List::create(_["mle.pa"]   = pa,
-                       _["mle.ai"]   = ai,
+    rst = List::create(_["mle_pa"]   = pa,
+                       _["mle_ai"]   = ai,
                        _["residual"] = ci);
+  }
+
+  return(rst);
+}
+
+
+//' Isotonic regression prediction
+//'
+//' @export
+// [[Rcpp::export]]
+NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit) {
+  int nx = x.size();
+  NumericMatrix rst(nx, 2);
+
+  int i, j;
+  for (i = 0; i < nx; i++) {
+    j         = rank_x(x[i], iso_fit(_, 0));
+    rst(i, 0) = x[i];
+    rst(i, 1) = iso_fit(j, 1);
+
+    // Rcout << i << j << x[i] << std::endl;
   }
 
   return(rst);

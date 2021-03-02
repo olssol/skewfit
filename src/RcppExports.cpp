@@ -5,6 +5,18 @@
 
 using namespace Rcpp;
 
+// rank_x
+int rank_x(double x, NumericVector v);
+RcppExport SEXP _skewfit_rank_x(SEXP xSEXP, SEXP vSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(rank_x(x, v));
+    return rcpp_result_gen;
+END_RCPP
+}
 // apnorm
 double apnorm(double u);
 RcppExport SEXP _skewfit_apnorm(SEXP uSEXP) {
@@ -118,6 +130,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pred_iso
+NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit);
+RcppExport SEXP _skewfit_pred_iso(SEXP xSEXP, SEXP iso_fitSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type iso_fit(iso_fitSEXP);
+    rcpp_result_gen = Rcpp::wrap(pred_iso(x, iso_fit));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cPava
 NumericVector cPava(NumericVector y, NumericVector w);
 RcppExport SEXP _skewfit_cPava(SEXP ySEXP, SEXP wSEXP) {
@@ -168,6 +192,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_skewfit_rank_x", (DL_FUNC) &_skewfit_rank_x, 2},
     {"_skewfit_apnorm", (DL_FUNC) &_skewfit_apnorm, 1},
     {"_skewfit_cGetEw", (DL_FUNC) &_skewfit_cGetEw, 3},
     {"_skewfit_cSlm0", (DL_FUNC) &_skewfit_cSlm0, 2},
@@ -176,6 +201,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_fit_para_skew", (DL_FUNC) &_skewfit_fit_para_skew, 6},
     {"_skewfit_fit_iso_norm", (DL_FUNC) &_skewfit_fit_iso_norm, 8},
     {"_skewfit_fit_iso_skew", (DL_FUNC) &_skewfit_fit_iso_skew, 9},
+    {"_skewfit_pred_iso", (DL_FUNC) &_skewfit_pred_iso, 2},
     {"_skewfit_cPava", (DL_FUNC) &_skewfit_cPava, 2},
     {"_skewfit_FPava", (DL_FUNC) &_skewfit_FPava, 2},
     {"_skewfit_FUfit", (DL_FUNC) &_skewfit_FUfit, 2},
