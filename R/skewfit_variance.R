@@ -41,13 +41,19 @@ get_smooth_bs_x <- function(x, fit_iso, h = NULL) {
     rst
 }
 
-
 #' Bootstrap ISO SKEW
 #'
 #'
 #' @export
 #'
-bs_iso_skew <- function(rst_fit, nbs = 100, seed = NULL, ...) {
+bs_iso_skew <- function(rst_fit, nbs = 100, seed = NULL,
+                        sample_residual = c("empirical", "parametric"),
+                        smooth_bs = TRUE,
+                        verbose   = 1,
+                        ...) {
+
+    sample_residual <- match.arg(sample_residual)
+
     if (!is.null(seed)) {
         old_seed <- set.seed(seed)
     }
@@ -58,6 +64,7 @@ bs_iso_skew <- function(rst_fit, nbs = 100, seed = NULL, ...) {
     ai       <- rst_fit$mle_ai
     residual <- rst_fit$residual
 
+    est      <- c(pa, ai)
     n        <- length(residual)
     h        <- bw.nrd(x)
 
@@ -68,14 +75,35 @@ bs_iso_skew <- function(rst_fit, nbs = 100, seed = NULL, ...) {
     ## bootstrap
     rst <- NULL
     for (i in seq_len(nbs)) {
-        smp_bs <- get_smooth_bs_x(x, cbind(x, ai), h)
-        ord_x  <- order(smp_bs[, 1])
-        smp_x  <- smp_bs[ord_x, 1]
-        smp_fx <- smp_bs[ord_x, 2]
+        if (1 == verbose)
+            cat("Boostrap ", i, "\n")
 
+        if (smooth_bs) {
+            smp_bs <- get_smooth_bs_x(x, cbind(x, ai), h)
+            ord_x  <- order(smp_bs[, 1])
+            smp_x  <- smp_bs[ord_x, 1]
+            smp_fx <- smp_bs[ord_x, 2]
+        } else {
+            ## typical bs
+            ord_x  <- 1:n
+            smp_x  <- x
+            smp_fx <- ai
+        }
+
+        ## bs covariates z
         smp_z  <- z[ord_x, ]
         smp_bz <- beta_z[ord_x]
-        smp_re <- sample(residual, n, replace = TRUE)
+
+        ## bs residual
+        smp_re <- switch(sample_residual,
+                         empirical  = sample(residual, n, replace = TRUE),
+                         parametric = {
+                             wi   <- rnorm(n)
+                             epsi <- rnorm(n, 0, sqrt(pa["sig2"]))
+                             pa["eta"] * wi + epsi
+                         })
+
+        ## bs outcome
         smp_y  <- smp_fx + smp_bz + smp_re
 
         ## fit
@@ -93,5 +121,7 @@ bs_iso_skew <- function(rst_fit, nbs = 100, seed = NULL, ...) {
         set.seed(old_seed)
     }
 
-    rst
+    ## return
+    list(est = est,
+         bs  = rst)
 }

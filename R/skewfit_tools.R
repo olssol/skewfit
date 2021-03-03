@@ -32,3 +32,22 @@ get_lm_coeff_2 <- function(y, x) {
     lrs <- lm(y ~ x)
     coefficients(lrs)
 }
+
+
+#' Get bootstrap confidence interval
+#'
+#'
+#' @export
+#'
+get_bs_ci <- function(bs, method = c("empirical"), quants = c(0.025, 0.975),
+                      est = NULL) {
+
+    method <- match.arg(method)
+
+    rst_ci <- switch(method,
+                     empirical = {
+                         ci <-  apply(bs, 1, function(x) quantile(x, quants))
+                         t(ci)
+                     })
+    rst_ci
+}

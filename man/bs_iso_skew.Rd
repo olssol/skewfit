@@ -4,7 +4,15 @@
 \alias{bs_iso_skew}
 \title{Bootstrap ISO SKEW}
 \usage{
-bs_iso_skew(rst_fit, nbs = 100, seed = NULL, ...)
+bs_iso_skew(
+  rst_fit,
+  nbs = 100,
+  seed = NULL,
+  sample_residual = c("empirical", "parametric"),
+  smooth_bs = TRUE,
+  verbose = 1,
+  ...
+)
 }
 \description{
 Bootstrap ISO SKEW
