@@ -28,6 +28,9 @@ get_lm_coeff <- function(y, x) {
     coefficients(lrs)
 }
 
+#'
+#'
+#' @export
 get_lm_coeff_2 <- function(y, x) {
     lrs <- lm(y ~ x)
     coefficients(lrs)
