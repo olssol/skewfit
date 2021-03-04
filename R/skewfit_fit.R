@@ -41,8 +41,19 @@ sf_para_norm <- function(y, x, z) {
                        fn     = f_lsq,
                        lower  = lower, upper = upper)$par
 
-    list(mle_pa   = mle_pa,
-         residual = f_res(mle_pa))
+    residual <- f_res(mle_pa)
+    sig2     <- var(residual)
+
+    rst <- list(mle_pa   = c(mle_pa, sig2 = sig2),
+                mle_ai   = mle_pa[1] + mle_pa[2] * x,
+                residual = residual)
+
+    ## return
+    rst$x <- x
+    rst$z <- z
+    class(rst) <- c("SKEWFIT", "PARA", "NORM")
+
+    rst
 }
 
 #' Parametric model with Skew Normal Errors
@@ -56,12 +67,17 @@ sf_para_skew <- function(y, x, z, init_pa = NULL,
 
     init_lm <- lm(y ~ z)
     if (is.null(init_pa)) {
-        init_pa <- c(coefficients(init_lm), eta = 1, sig2 = 5, alpha = 0)
+        beta    <- coefficients(init_lm)
+        beta    <- append(beta, 0, after = 1)
+        init_pa <- c(beta, eta = 1, sig2 = 1)
     }
 
-    rst <- fit_para_skew(init_pa,
-                         y, x, z,
+    rst <- fit_para_skew(init_pa, y, x, z,
                          max_steps = max_steps, tol = tol)
+    ## return
+    rst$x <- x
+    rst$z <- z
+    class(rst) <- c("SKEWFIT", "PARA", "SKEW")
     rst
 }
 
@@ -77,11 +93,16 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL,
         init_pa <- c(rep(0, ncol(z)), sig2 = 1, mode = max(x))
     }
 
+    ## fit
     rst <- fit_iso_norm(init_pa, init_ai, y, x, z,
                         unimodal  = unimodel,
                         max_steps = max_steps,
                         tol       = tol)
 
+    ## return
+    rst$x <- x
+    rst$z <- z
+    class(rst) <- c("SKEWFIT", "ISO", "NORM")
     rst
 }
 
@@ -105,9 +126,9 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL,
                         max_steps = max_steps,
                         tol       = tol)
 
+    ## return
     rst$x <- x
     rst$z <- z
-
-    ## return
+    class(rst) <- c("SKEWFIT", "ISO", "SKEW")
     rst
 }

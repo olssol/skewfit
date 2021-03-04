@@ -6,6 +6,7 @@
 #' @useDynLib skewfit, .registration = TRUE
 #'
 #' @import Rcpp
+#' @importFrom parallel detectCores mclapply
 #'
 #'
 NULL

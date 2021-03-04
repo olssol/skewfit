@@ -164,7 +164,7 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
   int           n  = y.size(), nz = z.ncol();
   NumericVector yeta(n), yzeta(n), beta(1+nz), alpha(1);
   NumericMatrix ew(n, 2);
-  NumericVector ci(n);
+  NumericVector ai(n), ci(n);
 
   Function      coef("get_lm_coeff_2");
   Function      coef0("get_lm_coeff");
@@ -177,9 +177,9 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
 
   //initial ci
   for (i = 0; i < n; i++) {
-    tmp1 = pa[0] + pa[3+nz] * x[i];
+    tmp1 = pa[0] + pa[1] * x[i];
     for (j = 0; j < nz; j++) {
-      tmp1 += pa[1+j] * z(i,j);
+      tmp1 += pa[2+j] * z(i,j);
     }
 
     ci[i] = y[i] - tmp1;
@@ -187,10 +187,10 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
 
   while (inx < max_steps & last_diff > tol) {
     last_pa = clone(pa);
-    ew      = cGetEw(ci, pa[1+nz], pa[2+nz]);
+    ew      = cGetEw(ci, pa[2+nz], pa[3+nz]);
 
     for (i = 0; i < n; i++) {
-      yeta[i] = y[i] - pa[3+nz] * x[i] - pa[1+nz] * ew(i,0);
+      yeta[i] = y[i] - pa[1] * x[i] - pa[2+nz] * ew(i,0);
     }
 
     // get intercept and coeff for z
@@ -203,7 +203,7 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
         tmp1 += beta[1+j] * z(i,j);
       }
 
-      yzeta[i] = y[i] - tmp1 - pa[1+nz] * ew(i,0);
+      yzeta[i] = y[i] - tmp1 - pa[2+nz] * ew(i,0);
     }
 
     //Rcout << yzeta << "\n";
@@ -213,7 +213,8 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
 
     //update ci
     for (i = 0; i < n; i++) {
-      tmp1 = beta[0] + alpha[0] * x[i];
+      ai[i] = beta[0] + alpha[0] * x[i];
+      tmp1  = ai[i];
       for (j = 0; j < nz; j++) {
         tmp1 += beta[1+j] * z(i,j);
       }
@@ -235,13 +236,13 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
     sig2 = tmp1 / n;
 
     //return parameter
-    for (i = 0; i < beta.size(); i++) {
-      pa[i] = beta[i];
+    pa[0] = beta[0];
+    pa[1] = alpha[0];
+    for (i = 1; i < beta.size(); i++) {
+      pa[i+1] = beta[i];
     }
-
-    pa[1+nz] = eta;
-    pa[2+nz] = sig2;
-    pa[3+nz] = alpha[0];
+    pa[2+nz] = eta;
+    pa[3+nz] = sig2;
 
     last_diff = 0;
     for (i = 0; i < pa.size(); i++) {
@@ -255,6 +256,7 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
     rst = List::create(NA_REAL, NA_REAL);
   } else {
     rst = List::create(_["mle_pa"]   = pa,
+                       _["mle_ai"]   = ai,
                        _["residual"] = ci);
   }
 

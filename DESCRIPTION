@@ -1,7 +1,7 @@
 Package: skewfit
 Type: Package
 Title: Isotonic Regression with Skewed Error
-Version: 3.0
+Version: 3.1
 Author: Chenguang Wang [aut, cre]
 Maintainer: Chenguang Wang <cwang68@jhmi.edu>
 Description: One paragraph description of what the package does as one
