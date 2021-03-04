@@ -4,6 +4,18 @@
 sf_bootstrap <- function(object, ...)
     UseMethod("sf_bootstrap")
 
+#' Log-Likelihood
+#'
+#' @export
+sf_lpdf <- function(object, ...)
+    UseMethod("sf_lpdf")
+
+#' Bootstrap confidence intervals
+#'
+#' @export
+sf_bs_ci <- function(object, ...)
+    UseMethod("sf_bs_ci")
+
 #' Sample residual
 #'
 #' @export
@@ -159,4 +171,61 @@ sf_sample_residual.NORM <- function(object, n,
                      empirical  = sample(residual, n, replace = TRUE),
                      parametric = rnorm(n, 0, sqrt(pa["sig2"])))
     smp_re
+}
+
+#' Log-Likelihood from SKEW model
+#'
+#' @method sf_lpdf SKEW
+#'
+#' @export
+#'
+sf_lpdf.SKEW <- function(object, ...) {
+    residual <- object$residual
+    pa       <- object$mle_pa
+
+    get_sn_lpdf(residual,
+                eta   = pa["eta"],
+                sigma = sqrt(pa["sig2"]))
+}
+
+#' Log-Likelihood from NORM model
+#'
+#' @method sf_lpdf NORM
+#'
+#' @export
+#'
+sf_lpdf.NORM <- function(object, ...) {
+    residual <- object$residual
+    pa       <- object$mle_pa
+
+    sum(dnorm(residual, sd = sqrt(pa["sig2"]), log = TRUE))
+}
+
+#' Get confidence interval from bootstrap results
+#'
+#' @method sf_bs_ci BOOTSTRAP
+#'
+#' @export
+#'
+sf_bs_ci.BOOTSTRAP <- function(object, method = c("empirical"),
+                               quants = c(0.025, 0.975), ...) {
+
+    method <- match.arg(method)
+
+    bs  <- object$bs
+    est <- object$est
+    rst_ci <- switch(method,
+                     empirical = {
+                         ci <-  apply(bs, 1, function(x) quantile(x, quants))
+                         t(ci)
+                     })
+
+    rst_sd   <- apply(bs, 1, sd)
+    rst_mean <- apply(bs, 1, mean)
+
+    cbind(est     = est,
+          bs_mean = rst_mean,
+          bs_sd   = rst_sd,
+          ci_lb = rst_ci[, 1],
+          ci_ub = rst_ci[, 2])
 }

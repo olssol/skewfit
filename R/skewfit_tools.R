@@ -8,7 +8,7 @@ get_sn_lpdf <- function(u, eta = 0, mu = 0, sigma = 1) {
     s2    <- sigma^2;
     e2ps2 <- sqrt(e2 + s2);
 
-    x1  <- (u - mu)/e2ps2;
+    x1  <- (u - mu) / e2ps2;
     x2  <- (u - mu) * eta / e2ps2 / sigma;
     rst <- log(2) -  log(e2ps2);
     rst <- rst + dnorm(x1, log = TRUE) + log(pnorm(x2));
