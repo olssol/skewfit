@@ -1,9 +1,31 @@
+#' Simulate skewed normal
+#'
+#' @export
+#'
+sf_sn_rnd  <- function(n, eta = 0, sigma = 1) {
+    rst <- abs(rnorm(n));
+    rst <- eta * rst + rnorm(n, sd = sigma);
+}
+
+#' Get Skewness of Half-Normal
+#'
+#' @export
+#'
+sf_sn_skew <- function(eta) {
+    eta  <- eta / sqrt(1 + eta^2)
+    mu   <- eta * sqrt(2 / pi)
+    sig2 <- 1 - 2 * eta^2 / pi
+    skew <- (4 - pi) / 2 * (eta * sqrt(2 / pi))^3/((1 - 2*eta^2/pi)^1.5)
+
+    c(mu = mu, sig2 =  sig2, skew = skew)
+}
+
 #' Get log likelihood from skewed normal
 #'
 #'
 #' @export
 #'
-get_sn_lpdf <- function(u, eta = 0, mu = 0, sigma = 1) {
+sf_sn_lpdf <- function(u, eta = 0, mu = 0, sigma = 1) {
     e2    <- eta^2;
     s2    <- sigma^2;
     e2ps2 <- sqrt(e2 + s2);
@@ -91,12 +113,12 @@ get_sample_kernel <- function(n) {
 #'
 #' @export
 #'
-get_smooth_bs_x <- function(x, h = NULL) {
+get_smooth_bs_x <- function(x, h = NULL, f_kernel = get_sample_kernel) {
     if (is.null(h)) {
         h <- bw.nrd(x)
     }
 
-    smp_kernel <- get_sample_kernel(length(x))
+    smp_kernel <- f_kernel(length(x))
     smp_x      <- x + h * smp_kernel
 
     smp_x

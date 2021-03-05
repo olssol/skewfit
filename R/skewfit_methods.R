@@ -183,7 +183,7 @@ sf_lpdf.SKEW <- function(object, ...) {
     residual <- object$residual
     pa       <- object$mle_pa
 
-    get_sn_lpdf(residual,
+    sf_sn_lpdf(residual,
                 eta   = pa["eta"],
                 sigma = sqrt(pa["sig2"]))
 }
@@ -198,7 +198,8 @@ sf_lpdf.NORM <- function(object, ...) {
     residual <- object$residual
     pa       <- object$mle_pa
 
-    sum(dnorm(residual, sd = sqrt(pa["sig2"]), log = TRUE))
+    sum(dnorm(residual, sd = sqrt(pa["sig2"]),
+              log = TRUE))
 }
 
 #' Get confidence interval from bootstrap results

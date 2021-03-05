@@ -4,7 +4,7 @@
 \alias{get_smooth_bs_x}
 \title{Smoothed Bootstrap}
 \usage{
-get_smooth_bs_x(x, h = NULL)
+get_smooth_bs_x(x, h = NULL, f_kernel = get_sample_kernel)
 }
 \description{
 Smoothed Bootstrap
