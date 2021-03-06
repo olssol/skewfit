@@ -224,9 +224,58 @@ sf_bs_ci.BOOTSTRAP <- function(object, method = c("empirical"),
     rst_sd   <- apply(bs, 1, sd)
     rst_mean <- apply(bs, 1, mean)
 
-    cbind(est     = est,
-          bs_mean = rst_mean,
-          bs_sd   = rst_sd,
-          ci_lb = rst_ci[, 1],
-          ci_ub = rst_ci[, 2])
+    data.frame(est     = est,
+               bs_mean = rst_mean,
+               bs_sd   = rst_sd,
+               ci_lb = rst_ci[, 1],
+               ci_ub = rst_ci[, 2])
+}
+
+#' Plot predicted alpha(x)
+#'
+#'
+#' @method plot BOOTSTRAP
+#'
+#' @export
+#'
+plot.BOOTSTRAP <- function(object, ci = TRUE, true_ax = NULL, ...) {
+    x   <- object$pred_x
+    y   <- object$est
+    inx <- (1 + length(y) - length(x)):length(y)
+    y   <- y[inx]
+
+    data  <- data.frame(x = x, y = y)
+
+    ## get ci
+    if (ci) {
+        bs_ci <- sf_bs_ci(object)
+        bs_ci <- bs_ci[inx, ]
+
+        data$ci_lb <- bs_ci$ci_lb
+        data$ci_ub <- bs_ci$ci_ub
+    }
+
+    if (inherits(object, "ISO")) {
+        f_g <- geom_step
+    } else {
+        f_g <- geom_line
+    }
+
+    rst <- ggplot(data = data, aes(x = x, y = y)) +
+        f_g() +
+        theme_bw()
+
+    if (ci) {
+        rst <- rst +
+            f_g(mapping = aes(x = x, y = ci_lb), ltype = 2, color = "gray") +
+            f_g(mapping = aes(x = x, y = ci_ub), ltype = 2, color = "gray")
+    }
+
+    if (!is.null(true_ax)) {
+        rst <- rst +
+            geom_line(data = data.frame(x = x, y = true_ax),
+                      mapping = aes(x = x, y = y),
+                      color = "red", ltype = 2)
+    }
+    rst
 }
