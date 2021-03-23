@@ -4,7 +4,7 @@
 \alias{pred_iso}
 \title{Isotonic regression prediction}
 \usage{
-pred_iso(x, iso_fit)
+pred_iso(x, iso_fit, h = -1)
 }
 \description{
 Isotonic regression prediction

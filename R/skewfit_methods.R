@@ -31,31 +31,44 @@ sf_sample_residual <- function(object, ...)
 #'
 sf_bootstrap.SKEWFIT <- function(object, nbs = 100, seed = NULL,
                                  verbose = 1, pred_x = NULL,
-                                 n_cores = 1,
-                                 ...) {
+                                 n_cores = 1, ...) {
 
+    ## set random seed
     if (!is.null(seed)) {
         old_seed <- set.seed(seed)
     }
 
+    ## boostrap seed
+    bs_seeds <- floor(abs(rnorm(nbs)) * 100000)
+
+    ## predict x
     if (is.null(pred_x)) {
         pred_x <- object$x
     }
 
+    ## estimate
+    pred_fit <- predict(object, new_x = pred_x)
     est <- c(object$mle_pa,
-             predict(object, new_x = pred_x)$pred_ax)
+             pred_fit$pred_ax,
+             pred_fit$pred_ax_smooth)
 
+    ## bootstrap
     rst_bs <- parallel::mclapply(1:nbs,
                                  function(x) {
-                                     if (1 == verbose)
+                                     if (1 == verbose & 0 == x %% 50)
                                          cat("Bootstrap ", x, "\n")
-
-                                     get_single_bs(object, pred_x = pred_x, ...)
+                                     get_single_bs(object,
+                                                   pred_x = pred_x,
+                                                   seed   = bs_seeds[x],
+                                                   ...)
                                  },
                                  mc.cores = n_cores)
 
-    rst_bs <- matrix(unlist(rst_bs), ncol = nbs, byrow = FALSE)
+    rst_bs <- matrix(unlist(rst_bs),
+                     ncol = nbs,
+                     byrow = FALSE)
 
+    ## reset seed
     if (!is.null(seed)) {
         set.seed(old_seed)
     }
@@ -76,7 +89,9 @@ sf_bootstrap.SKEWFIT <- function(object, nbs = 100, seed = NULL,
 #'
 #' @export
 #'
-predict.ISO <- function(object, new_x = NULL, new_z = NULL, ...) {
+predict.ISO <- function(object,
+                        new_x = NULL, new_z = NULL, h = -1,
+                        ...) {
     if (is.null(new_x)) {
         new_x <- object$x
     }
@@ -86,18 +101,24 @@ predict.ISO <- function(object, new_x = NULL, new_z = NULL, ...) {
     }
 
     ## predict alpha(x)
-    pred_ax <- pred_iso(new_x,
-                        cbind(object$x, object$mle_ai))[, 2]
+    if (h <= 0) {
+        h <- bw.nrd(object$x)
+    }
+
+    x_ax           <- cbind(object$x, object$mle_ai)
+    pred_ax        <- pred_iso(new_x, x_ax)[, 2]
+    pred_ax_smooth <- pred_iso(new_x, x_ax, h = h)[, 2]
 
     ## predict beta z
     beta    <- object$mle_pa[seq_len(ncol(new_z))]
     pred_bz <- apply(cbind(new_z), 1,
                      function(w) sum(w * beta))
 
-    list(new_x  = new_x,
-         new_z  = new_z,
-         pred_ax = pred_ax,
-         pred_bz = pred_bz)
+    list(new_x          = new_x,
+         new_z          = new_z,
+         pred_ax        = pred_ax,
+         pred_ax_smooth = pred_ax_smooth,
+         pred_bz        = pred_bz)
 }
 
 #' Prediction from fitted parametric model
@@ -123,10 +144,11 @@ predict.PARA <- function(object, new_x = NULL, new_z = NULL, ...) {
     pred_bz <- apply(cbind(new_z), 1,
                      function(w) sum(w * beta))
 
-    list(new_x  = new_x,
-         new_z  = new_z,
-         pred_ax = pred_ax,
-         pred_bz = pred_bz)
+    list(new_x          = new_x,
+         new_z          = new_z,
+         pred_ax        = pred_ax,
+         pred_ax_smooth = pred_ax,
+         pred_bz        = pred_bz)
 }
 
 #' Sample residual from SKEW model
@@ -208,17 +230,26 @@ sf_lpdf.NORM <- function(object, ...) {
 #'
 #' @export
 #'
-sf_bs_ci.BOOTSTRAP <- function(object, method = c("empirical"),
+sf_bs_ci.BOOTSTRAP <- function(object,
+                               method = c("theoretical", "empirical"),
                                quants = c(0.025, 0.975), ...) {
 
     method <- match.arg(method)
 
     bs  <- object$bs
     est <- object$est
+    ci  <- apply(bs, 1, function(x) quantile(x, quants))
+    ci  <- t(ci)
+
     rst_ci <- switch(method,
                      empirical = {
-                         ci <-  apply(bs, 1, function(x) quantile(x, quants))
-                         t(ci)
+                         ci
+                     },
+                     theoretical = {
+                         rst <- apply(cbind(est, ci), 1, function(x) {
+                             sort(2 * x[1] - x[-1])
+                         })
+                         t(rst)
                      })
 
     rst_sd   <- apply(bs, 1, sd)
@@ -267,15 +298,15 @@ plot.BOOTSTRAP <- function(object, ci = TRUE, true_ax = NULL, ...) {
 
     if (ci) {
         rst <- rst +
-            f_g(mapping = aes(x = x, y = ci_lb), ltype = 2, color = "gray") +
-            f_g(mapping = aes(x = x, y = ci_ub), ltype = 2, color = "gray")
+            f_g(mapping = aes(x = x, y = ci_lb), lty = 2, color = "gray") +
+            f_g(mapping = aes(x = x, y = ci_ub), lty = 2, color = "gray")
     }
 
     if (!is.null(true_ax)) {
         rst <- rst +
             geom_line(data = data.frame(x = x, y = true_ax),
                       mapping = aes(x = x, y = y),
-                      color = "red", ltype = 2)
+                      color = "red", lty = 2)
     }
     rst
 }

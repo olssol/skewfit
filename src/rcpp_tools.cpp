@@ -476,21 +476,101 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 }
 
 
+//' Kernel Function
+//'
+//' @export
+// [[Rcpp::export]]
+double  get_kernel(double v) {
+  double rst;
+
+  if (abs(v) <= 1) {
+    rst  = 16.0 + 35 * v - 35 * pow(v, 3);
+    rst += 21 * pow(v, 5) - 5 * pow(v, 7);
+    rst /= 32.0;
+  } else if (v > 1) {
+        rst = 1;
+  } else {
+        rst = 0;
+  }
+
+  return rst;
+}
+
+//' Kernel smooth function
+//'
+//'
+//'
+// [[Rcpp::export]]
+NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h) {
+  int n = x.size(), nf = fn.nrow();
+  int i, j, njumps;
+  double t1, t2, t3, cf;
+  double a, b, min_f, range_f;
+
+  NumericMatrix jumps(nf, 2);
+  NumericMatrix rst(n, 2);
+
+  // minimum and maximum
+  min_f   = fn(0,      1);
+  range_f = fn(nf - 1, 1) - fn(0, 1);
+
+  // find jumps in fn
+  njumps           = 0;
+  jumps(njumps, 0) = fn(0, 0);
+  jumps(njumps, 1) = 0;
+
+  for (i = 1; i < nf; i++) {
+    if (fn(i, 1) == fn(i - 1, 1))
+      continue;
+
+    njumps++;
+    jumps(njumps, 0) = fn(i, 0);
+    jumps(njumps, 1) = fn(i, 1) - fn(i - 1, 1);
+    jumps(njumps, 1) /= range_f;
+  }
+
+  // boundary correction
+  a = 0;
+  b = 1; // jumps(njumps, 0)
+
+  for (i = 0; i < n; i++) {
+    cf = 0;
+    for (j = 0; j <= njumps; j++) {
+      t1 = (x[i] - jumps(j, 0)) / h;
+      t2 = (x[i] + jumps(j, 0) - 2 * a) / h;
+      t3 = (2 * b - x[i] - jumps(j, 0)) / h;
+
+      cf += (get_kernel(t1) + get_kernel(t2) - get_kernel(t3)) * jumps(j, 1);
+    }
+
+    rst(i, 0) = x[i];
+    rst(i, 1) = cf * range_f + min_f;
+  }
+
+  //return
+  return(rst);
+}
+
+
 //' Isotonic regression prediction
 //'
 //' @export
 // [[Rcpp::export]]
-NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit) {
-  int nx = x.size();
+NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit, double h = -1) {
+  int           nx = x.size();
   NumericMatrix rst(nx, 2);
 
   int i, j;
-  for (i = 0; i < nx; i++) {
-    j         = rank_x(x[i], iso_fit(_, 0));
-    rst(i, 0) = x[i];
-    rst(i, 1) = iso_fit(j, 1);
+  if (h <= 0) {
+    for (i = 0; i < nx; i++) {
+      j         = rank_x(x[i], iso_fit(_, 0));
+      rst(i, 0) = x[i];
+      rst(i, 1) = iso_fit(j, 1);
 
-    // Rcout << i << j << x[i] << std::endl;
+      // Rcout << i << j << x[i] << std::endl;
+    }
+  } else {
+    rst = get_kernel_fn(x, iso_fit, h);
   }
 
   return(rst);

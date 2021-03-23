@@ -47,11 +47,26 @@ fit_iso_skew <- function(pa, ai, y, x, z, unimodal, usez, max_steps, tol) {
     .Call(`_skewfit_fit_iso_skew`, pa, ai, y, x, z, unimodal, usez, max_steps, tol)
 }
 
+#' Kernel Function
+#'
+#' @export
+get_kernel <- function(v) {
+    .Call(`_skewfit_get_kernel`, v)
+}
+
+#' Kernel smooth function
+#'
+#'
+#'
+get_kernel_fn <- function(x, fn, h) {
+    .Call(`_skewfit_get_kernel_fn`, x, fn, h)
+}
+
 #' Isotonic regression prediction
 #'
 #' @export
-pred_iso <- function(x, iso_fit) {
-    .Call(`_skewfit_pred_iso`, x, iso_fit)
+pred_iso <- function(x, iso_fit, h = -1) {
+    .Call(`_skewfit_pred_iso`, x, iso_fit, h)
 }
 
 cPava <- function(y, w) {

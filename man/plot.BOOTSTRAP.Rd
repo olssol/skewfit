@@ -4,7 +4,7 @@
 \alias{plot.BOOTSTRAP}
 \title{Plot predicted alpha(x)}
 \usage{
-\method{plot}{BOOTSTRAP}(object, ci = TRUE, ...)
+\method{plot}{BOOTSTRAP}(object, ci = TRUE, true_ax = NULL, ...)
 }
 \description{
 Plot predicted alpha(x)

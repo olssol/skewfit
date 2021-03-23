@@ -128,62 +128,81 @@ get_smooth_bs_x <- function(x, h = NULL, f_kernel = get_sample_kernel) {
 ## Single Bootstrap
 ##
 ##
-get_single_bs <- function(rst_fit, smooth_bs = TRUE, pred_x = NULL,
-                          method_residual = c("empirical", "parametric"),
-                          ...) {
+get_single_bs <- function(rst_fit,
+                          pred_x   = NULL,
+                          residual = c("empirical", "parametric"),
+                          smooth   = TRUE,
+                          replace  = FALSE,
+                          h        = -1,
+                          ...,
+                          seed     = NULL) {
 
-    x        <- rst_fit$x
-    z        <- rst_fit$z
-    pa       <- rst_fit$mle_pa
-    ai       <- rst_fit$mle_ai
-    residual <- rst_fit$residual
+    ## set random seed
+    if (!is.null(seed))
+        old_seed <- set.seed(seed)
 
-    n        <- length(x)
-    h        <- bw.nrd(x)
-    beta_z   <- predict(rst_fit)$pred_bz
-
+    ## original data
     is_skew  <- inherits(rst_fit, "SKEW")
     is_iso   <- inherits(rst_fit, "ISO")
+    x        <- rst_fit$x
+    z        <- rst_fit$z
+
+    if (h < 1)
+        ## bandwidth
+        h <- bw.nrd(x)
+
+    fit      <- predict(rst_fit, ...)
+    beta_z   <- fit$pred_bz
+    ax       <- fit$pred_ax
+    ax_smh   <- fit$pred_ax_smooth
 
     if (is.null(pred_x)) {
         pred_x <- x
     }
 
-    if (smooth_bs) {
-        smp_x  <- get_smooth_bs_x(x, h)
-        ord_x  <- order(smp_x)
-        smp_x  <- smp_x[ord_x]
-        smp_fx <- predict(rst_fit, new_x = smp_x)$pred_ax
+    ## bootstrap samples
+    inx <- sample(seq_len(length(x)), replace = replace)
+    inx <- sort(inx)
+
+    ## bootstrap x and alpha(x)
+    smp_x <- x[inx]
+    if (smooth) {
+        smp_ax <- ax_smh[inx]
     } else {
-        ## typical bs
-        ord_x  <- seq_len(length(x))
-        smp_x  <- x
-        smp_fx <- ai
+        smp_ax <- ax[inx]
     }
 
-    ## bs covariates z
-    smp_z  <- z[ord_x, ]
-    smp_bz <- beta_z[ord_x]
+    ## bootstrap z and beta * z
+    smp_z  <- z[inx, ]
+    smp_bz <- beta_z[inx]
 
-    ## bs residual
-    smp_re <- sf_sample_residual(rst_fit, method = method_residual)
+    ## bootstrap residual
+    smp_re <- sf_sample_residual(rst_fit,
+                                 n      = length(x),
+                                 method = residual)
+    ## bootstrap outcome
+    smp_y <- smp_ax + smp_bz + smp_re
 
-    ## bs outcome
-    smp_y  <- smp_fx + smp_bz + smp_re
-
-    ## fit
+    ## fit model to bootstrap sample
     if (is_iso & is_skew) {
-        cur_rst <- sf_iso_skew(smp_y, smp_x, as.matrix(smp_z), ...)
+        cur_rst <- sf_iso_skew(smp_y,  smp_x, as.matrix(smp_z), ...)
     } else if (is_iso & !is_skew) {
-        cur_rst <- sf_iso_norm(smp_y, smp_x, as.matrix(smp_z), ...)
+        cur_rst <- sf_iso_norm(smp_y,  smp_x, as.matrix(smp_z), ...)
     } else if (!is_iso & is_skew) {
         cur_rst <- sf_para_skew(smp_y, smp_x, as.matrix(smp_z), ...)
     } else {
         cur_rst <- sf_para_norm(smp_y, smp_x, as.matrix(smp_z), ...)
     }
 
-    ## append rst
+    ## append result
     cur_pa  <- cur_rst$mle_pa
-    cur_ai  <- predict(cur_rst, new_x = pred_x)$pred_ax
-    c(cur_pa, cur_ai)
+    cur_fit <- predict(cur_rst, new_x = pred_x)
+    rst     <- c(cur_pa, cur_fit$pred_ax, cur_fit$pred_ax_smooth)
+
+    ## reset random seed
+    if (!is.null(seed))
+        set.seed(old_seed)
+
+    ## return
+    rst
 }

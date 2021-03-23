@@ -73,7 +73,8 @@ sf_para_skew <- function(y, x, z, init_pa = NULL,
     }
 
     rst <- fit_para_skew(init_pa, y, x, z,
-                         max_steps = max_steps, tol = tol)
+                         max_steps = max_steps,
+                         tol = tol)
     ## return
     rst$x <- x
     rst$z <- z

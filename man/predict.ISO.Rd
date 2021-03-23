@@ -4,7 +4,7 @@
 \alias{predict.ISO}
 \title{Prediction from fitted isotonic model}
 \usage{
-\method{predict}{ISO}(object, new_x = NULL, new_z = NULL, ...)
+\method{predict}{ISO}(object, new_x = NULL, new_z = NULL, h = -1, ...)
 }
 \description{
 Prediction from fitted isotonic model
