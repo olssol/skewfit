@@ -58,15 +58,15 @@ get_kernel <- function(v) {
 #'
 #'
 #'
-get_kernel_fn <- function(x, fn, h) {
-    .Call(`_skewfit_get_kernel_fn`, x, fn, h)
+get_kernel_fn <- function(x, fn, h, correction = TRUE) {
+    .Call(`_skewfit_get_kernel_fn`, x, fn, h, correction)
 }
 
 #' Isotonic regression prediction
 #'
 #' @export
-pred_iso <- function(x, iso_fit, h = -1) {
-    .Call(`_skewfit_pred_iso`, x, iso_fit, h)
+pred_iso <- function(x, iso_fit, h = -1, correction = TRUE) {
+    .Call(`_skewfit_pred_iso`, x, iso_fit, h, correction)
 }
 
 cPava <- function(y, w) {

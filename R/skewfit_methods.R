@@ -107,7 +107,7 @@ predict.ISO <- function(object,
 
     x_ax           <- cbind(object$x, object$mle_ai)
     pred_ax        <- pred_iso(new_x, x_ax)[, 2]
-    pred_ax_smooth <- pred_iso(new_x, x_ax, h = h)[, 2]
+    pred_ax_smooth <- pred_iso(new_x, x_ax, h = h, ...)[, 2]
 
     ## predict beta z
     beta    <- object$mle_pa[seq_len(ncol(new_z))]

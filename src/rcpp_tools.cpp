@@ -501,10 +501,12 @@ double  get_kernel(double v) {
 //'
 //'
 // [[Rcpp::export]]
-NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h) {
+NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
+                            bool correction = true) {
+
   int n = x.size(), nf = fn.nrow();
   int i, j, njumps;
-  double t1, t2, t3, cf;
+  double t, kt, cf;
   double a, b, min_f, range_f;
 
   NumericMatrix jumps(nf, 2);
@@ -536,11 +538,18 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h) {
   for (i = 0; i < n; i++) {
     cf = 0;
     for (j = 0; j <= njumps; j++) {
-      t1 = (x[i] - jumps(j, 0)) / h;
-      t2 = (x[i] + jumps(j, 0) - 2 * a) / h;
-      t3 = (2 * b - x[i] - jumps(j, 0)) / h;
+      t  = (x[i] - jumps(j, 0)) / h;
+      kt = get_kernel(t);
 
-      cf += (get_kernel(t1) + get_kernel(t2) - get_kernel(t3)) * jumps(j, 1);
+      if (correction) {
+        t   = (x[i] + jumps(j, 0) - 2 * a) / h;
+        kt += get_kernel(t);
+
+        t   = (2 * b - x[i] - jumps(j, 0)) / h;
+        kt -= get_kernel(t);
+      }
+
+      cf += kt * jumps(j, 1);
     }
 
     rst(i, 0) = x[i];
@@ -556,7 +565,10 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h) {
 //'
 //' @export
 // [[Rcpp::export]]
-NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit, double h = -1) {
+NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit,
+                       double h = -1,
+                       bool correction = true) {
+
   int           nx = x.size();
   NumericMatrix rst(nx, 2);
 
@@ -570,7 +582,7 @@ NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit, double h = -1) {
       // Rcout << i << j << x[i] << std::endl;
     }
   } else {
-    rst = get_kernel_fn(x, iso_fit, h);
+    rst = get_kernel_fn(x, iso_fit, h, correction);
   }
 
   return(rst);

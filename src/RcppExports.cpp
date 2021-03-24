@@ -142,28 +142,30 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_kernel_fn
-NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h);
-RcppExport SEXP _skewfit_get_kernel_fn(SEXP xSEXP, SEXP fnSEXP, SEXP hSEXP) {
+NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h, bool correction);
+RcppExport SEXP _skewfit_get_kernel_fn(SEXP xSEXP, SEXP fnSEXP, SEXP hSEXP, SEXP correctionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type fn(fnSEXP);
     Rcpp::traits::input_parameter< double >::type h(hSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_kernel_fn(x, fn, h));
+    Rcpp::traits::input_parameter< bool >::type correction(correctionSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_kernel_fn(x, fn, h, correction));
     return rcpp_result_gen;
 END_RCPP
 }
 // pred_iso
-NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit, double h);
-RcppExport SEXP _skewfit_pred_iso(SEXP xSEXP, SEXP iso_fitSEXP, SEXP hSEXP) {
+NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit, double h, bool correction);
+RcppExport SEXP _skewfit_pred_iso(SEXP xSEXP, SEXP iso_fitSEXP, SEXP hSEXP, SEXP correctionSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type iso_fit(iso_fitSEXP);
     Rcpp::traits::input_parameter< double >::type h(hSEXP);
-    rcpp_result_gen = Rcpp::wrap(pred_iso(x, iso_fit, h));
+    Rcpp::traits::input_parameter< bool >::type correction(correctionSEXP);
+    rcpp_result_gen = Rcpp::wrap(pred_iso(x, iso_fit, h, correction));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -227,8 +229,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_fit_iso_norm", (DL_FUNC) &_skewfit_fit_iso_norm, 8},
     {"_skewfit_fit_iso_skew", (DL_FUNC) &_skewfit_fit_iso_skew, 9},
     {"_skewfit_get_kernel", (DL_FUNC) &_skewfit_get_kernel, 1},
-    {"_skewfit_get_kernel_fn", (DL_FUNC) &_skewfit_get_kernel_fn, 3},
-    {"_skewfit_pred_iso", (DL_FUNC) &_skewfit_pred_iso, 3},
+    {"_skewfit_get_kernel_fn", (DL_FUNC) &_skewfit_get_kernel_fn, 4},
+    {"_skewfit_pred_iso", (DL_FUNC) &_skewfit_pred_iso, 4},
     {"_skewfit_cPava", (DL_FUNC) &_skewfit_cPava, 2},
     {"_skewfit_FPava", (DL_FUNC) &_skewfit_FPava, 2},
     {"_skewfit_FUfit", (DL_FUNC) &_skewfit_FUfit, 2},
