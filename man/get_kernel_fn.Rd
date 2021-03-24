@@ -4,7 +4,7 @@
 \alias{get_kernel_fn}
 \title{Kernel smooth function}
 \usage{
-get_kernel_fn(x, fn, h)
+get_kernel_fn(x, fn, h, correction = TRUE)
 }
 \description{
 Kernel smooth function
