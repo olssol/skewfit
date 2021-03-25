@@ -483,11 +483,11 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 double  get_kernel(double v) {
   double rst;
 
-  if (abs(v) <= 1) {
+  if (fabs(v) <= 1.0) {
     rst  = 16.0 + 35.0 * v - 35.0 * pow(v, 3);
     rst += 21.0 * pow(v, 5) - 5.0 * pow(v, 7);
     rst /= 32.0;
-  } else if (v > 1) {
+  } else if (v > 1.0) {
         rst = 1;
   } else {
         rst = 0;
@@ -540,8 +540,6 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
     for (j = 0; j <= njumps; j++) {
       t  = (x[i] - jumps(j, 0)) / h;
       kt = get_kernel(t);
-
-      Rcout << i << ":" << j << ":"<< kt << std::endl;
 
       if (correction) {
         t   = (x[i] + jumps(j, 0) - 2 * a) / h;
