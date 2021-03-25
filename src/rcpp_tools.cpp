@@ -529,6 +529,8 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
     jumps(njumps, 0) = fn(i, 0);
     jumps(njumps, 1) = fn(i, 1) - fn(i - 1, 1);
     jumps(njumps, 1) /= range_f;
+
+    Rcout << jumps(njumps, 0) << ":  " <<jumps(njumps, 1) << std::endl;
   }
 
   // boundary correction
@@ -555,7 +557,6 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
     rst(i, 0) = x[i];
     rst(i, 1) = cf * range_f + min_f;
 
-    Rcout << rst(i, 0) << ":  "<< rst(i, 1) << std::endl;
   }
 
   //return
