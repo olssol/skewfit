@@ -484,8 +484,8 @@ double  get_kernel(double v) {
   double rst;
 
   if (abs(v) <= 1) {
-    rst  = 16.0 + 35 * v - 35 * pow(v, 3);
-    rst += 21 * pow(v, 5) - 5 * pow(v, 7);
+    rst  = 16.0 + 35.0 * v - 35.0 * pow(v, 3);
+    rst += 21.0 * pow(v, 5) - 5.0 * pow(v, 7);
     rst /= 32.0;
   } else if (v > 1) {
         rst = 1;
@@ -529,8 +529,6 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
     jumps(njumps, 0) = fn(i, 0);
     jumps(njumps, 1) = fn(i, 1) - fn(i - 1, 1);
     jumps(njumps, 1) /= range_f;
-
-    Rcout << jumps(njumps, 0) << ":  " <<jumps(njumps, 1) << std::endl;
   }
 
   // boundary correction
@@ -542,6 +540,8 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
     for (j = 0; j <= njumps; j++) {
       t  = (x[i] - jumps(j, 0)) / h;
       kt = get_kernel(t);
+
+      Rcout << i << ":" << j << ":"<< kt << std::endl;
 
       if (correction) {
         t   = (x[i] + jumps(j, 0) - 2 * a) / h;
@@ -569,7 +569,7 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
 //' @export
 // [[Rcpp::export]]
 NumericMatrix pred_iso(NumericVector x, NumericMatrix iso_fit,
-                       double h = -1,
+                       double h = -1.0,
                        bool correction = true) {
 
   int           nx = x.size();

@@ -65,7 +65,7 @@ get_kernel_fn <- function(x, fn, h, correction = TRUE) {
 #' Isotonic regression prediction
 #'
 #' @export
-pred_iso <- function(x, iso_fit, h = -1, correction = TRUE) {
+pred_iso <- function(x, iso_fit, h = -1.0, correction = TRUE) {
     .Call(`_skewfit_pred_iso`, x, iso_fit, h, correction)
 }
 
