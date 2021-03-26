@@ -4,12 +4,7 @@
 \alias{sf_bs_ci.BOOTSTRAP}
 \title{Get confidence interval from bootstrap results}
 \usage{
-\method{sf_bs_ci}{BOOTSTRAP}(
-  object,
-  method = c("theoretical", "empirical"),
-  quants = c(0.025, 0.975),
-  ...
-)
+\method{sf_bs_ci}{BOOTSTRAP}(object, quants = c(0.025, 0.975), ...)
 }
 \description{
 Get confidence interval from bootstrap results

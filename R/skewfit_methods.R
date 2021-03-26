@@ -48,15 +48,16 @@ sf_bootstrap.SKEWFIT <- function(object, nbs = 100, seed = NULL,
 
     ## estimate
     pred_fit <- predict(object, new_x = pred_x)
-    est <- c(object$mle_pa,
-             pred_fit$pred_ax,
-             pred_fit$pred_ax_smooth)
+    est      <- c(object$mle_pa,
+                  pred_fit$pred_ax,
+                  pred_fit$pred_ax_smooth)
 
     ## bootstrap
     rst_bs <- parallel::mclapply(1:nbs,
                                  function(x) {
                                      if (1 == verbose & 0 == x %% 50)
                                          cat("Bootstrap ", x, "\n")
+
                                      get_single_bs(object,
                                                    pred_x = pred_x,
                                                    seed   = bs_seeds[x],
@@ -230,36 +231,40 @@ sf_lpdf.NORM <- function(object, ...) {
 #'
 #' @export
 #'
-sf_bs_ci.BOOTSTRAP <- function(object,
-                               method = c("theoretical", "empirical"),
-                               quants = c(0.025, 0.975), ...) {
+sf_bs_ci.BOOTSTRAP <- function(object, quants = c(0.025, 0.975), ...) {
+    bs       <- object$bs
+    pred_x   <- object$pred_x
+    est      <- object$est
 
-    method <- match.arg(method)
+    n_ax     <- length(pred_x)
+    n_pa     <- nrow(bs) - n_ax * 2
+    inx      <- 1:(n_pa + n_ax)
+    inx_smth <- c(1:n_pa, (n_pa + n_ax) + 1:n_ax)
 
-    bs  <- object$bs
-    est <- object$est
-    ci  <- apply(bs, 1, function(x) quantile(x, quants))
-    ci  <- t(ci)
+    rst_est  <- est[inx]
+    rst_sd   <- apply(bs, 1, sd)[inx]
 
-    rst_ci <- switch(method,
-                     empirical = {
-                         ci
-                     },
-                     theoretical = {
-                         rst <- apply(cbind(est, ci), 1, function(x) {
-                             sort(2 * x[1] - x[-1])
-                         })
-                         t(rst)
-                     })
+    ## empirical ci
+    rst_ci   <- apply(bs[inx, ], 1,
+                      function(x) quantile(x, quants))
 
-    rst_sd   <- apply(bs, 1, sd)
-    rst_mean <- apply(bs, 1, mean)
+    ## correct for smoothness
+    rst_ci_2 <- apply(cbind(est[inx],
+                            est[inx_smth],
+                            bs[inx_smth, ]), 1,
+                      function(x) {
+                          ci  <- x[-(1:2)] - x[2]
+                          ci  <- quantile(ci, quants)
+                          ci  <- sort(x[1] - ci)
+                      })
 
-    data.frame(est     = est,
-               bs_mean = rst_mean,
+    ## result
+    data.frame(est     = rst_est,
                bs_sd   = rst_sd,
-               ci_lb = rst_ci[, 1],
-               ci_ub = rst_ci[, 2])
+               emp_lb  = rst_ci[1, ],
+               emp_ub  = rst_ci[2, ],
+               adj_lb  = rst_ci_2[1, ],
+               adj_ub  = rst_ci_2[2, ])
 }
 
 #' Plot predicted alpha(x)

@@ -287,7 +287,7 @@ List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
   int           inx = 0, i, j;
   double        tmp1, tmp2;
 
-  while(inx < max_steps & last_diff > tol) {
+  while (inx < max_steps & last_diff > tol) {
     last_pa = clone(pa);
     last_ai = clone(ai);
 
@@ -513,7 +513,7 @@ NumericMatrix get_kernel_fn(NumericVector x, NumericMatrix fn, double h,
   NumericMatrix rst(n, 2);
 
   // minimum and maximum
-  min_f   = fn(0,      1);
+  min_f   = fn(0, 1);
   range_f = fn(nf - 1, 1) - fn(0, 1);
 
   // find jumps in fn
