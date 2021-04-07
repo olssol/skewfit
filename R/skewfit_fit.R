@@ -51,6 +51,8 @@ sf_para_norm <- function(y, x, z) {
     ## return
     rst$x <- x
     rst$z <- z
+    rst$y <- y
+
     class(rst) <- c("SKEWFIT", "PARA", "NORM")
 
     rst
@@ -78,6 +80,8 @@ sf_para_skew <- function(y, x, z, init_pa = NULL,
     ## return
     rst$x <- x
     rst$z <- z
+    rst$y <- y
+
     class(rst) <- c("SKEWFIT", "PARA", "SKEW")
     rst
 }
@@ -103,6 +107,8 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL,
     ## return
     rst$x <- x
     rst$z <- z
+    rst$y <- y
+
     class(rst) <- c("SKEWFIT", "ISO", "NORM")
     rst
 }
@@ -130,6 +136,8 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL,
     ## return
     rst$x <- x
     rst$z <- z
+    rst$y <- y
+
     class(rst) <- c("SKEWFIT", "ISO", "SKEW")
     rst
 }

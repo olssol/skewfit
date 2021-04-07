@@ -246,7 +246,7 @@ sf_bs_ci.BOOTSTRAP <- function(object, quants = c(0.025, 0.975), ...) {
 
     ## empirical ci
     rst_ci   <- apply(bs[inx, ], 1,
-                      function(x) quantile(x, quants))
+                      function(x) quantile(x, quants, na.rm = TRUE))
 
     ## correct for smoothness
     rst_ci_2 <- apply(cbind(est[inx],
@@ -254,7 +254,7 @@ sf_bs_ci.BOOTSTRAP <- function(object, quants = c(0.025, 0.975), ...) {
                             bs[inx_smth, ]), 1,
                       function(x) {
                           ci  <- x[-(1:2)] - x[2]
-                          ci  <- quantile(ci, quants)
+                          ci  <- quantile(ci, quants, na.rm = TRUE)
                           ci  <- sort(x[1] - ci)
                       })
 
