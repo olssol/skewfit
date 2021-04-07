@@ -376,16 +376,14 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
   double        tmp1, tmp2;
   int           inx = 0, i, j;
 
-  if (0 == usez) {
-    nz = 0;
-  }
-
   //initial ci
   NumericVector ci(n);
   for (i = 0; i < n; i++) {
     tmp1 = 0;
-    for (j = 0; j < nz; j++) {
-      tmp1 += pa[j] * z(i,j);
+    if (0 < usez) {
+      for (j = 0; j < nz; j++) {
+        tmp1 += pa[j] * z(i,j);
+      }
     }
 
     ci[i] = y[i] - ai[i] - tmp1;
@@ -400,15 +398,17 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
       yaieta[i] = y[i] - ai[i] - pa[nz] * ew(i,0);
     }
 
-    if (0 < nz) {
+    if (0 < usez) {
       beta = cSlm(yaieta, z);
     }
 
     for (i = 0; i < n; i++) {
       tmp1 = 0;
-      for (j = 0; j < nz; j++) {
-        tmp1 += beta[j] * z(i,j);
+      if (0 < usez) {
+        for (j = 0; j < nz; j++) {
+          tmp1 += beta[j] * z(i,j);
         }
+      }
 
       yzeta[i] = y[i] - tmp1 - pa[nz] * ew(i,0);
     }
@@ -423,9 +423,12 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 
     for (i = 0; i < n; i++) {
       tmp1 = 0;
-      for (j = 0; j < nz; j++) {
-        tmp1 += beta[j] * z(i,j);
+      if (0 < usez) {
+        for (j = 0; j < nz; j++) {
+          tmp1 += beta[j] * z(i,j);
+        }
       }
+
       ci[i] = y[i] - ai[i] - tmp1;
     }
 
@@ -465,7 +468,7 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
   }
 
   if (last_diff > tol) {
-    rst = List::create(NA_REAL, NA_REAL, NA_REAL, NA_REAL);
+    rst = List::create(NA_REAL, NA_REAL, NA_REAL);
   } else {
     rst = List::create(_["mle_pa"]   = pa,
                        _["mle_ai"]   = ai,
