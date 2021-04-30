@@ -4,7 +4,7 @@
 \alias{sf_sn_skew}
 \title{Get Skewness of Half-Normal}
 \usage{
-sf_sn_skew(eta)
+sf_sn_skew(eta, sigma = 1, mu = 0)
 }
 \description{
 Get Skewness of Half-Normal

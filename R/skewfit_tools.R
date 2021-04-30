@@ -11,13 +11,19 @@ sf_sn_rnd  <- function(n, eta = 0, sigma = 1) {
 #'
 #' @export
 #'
-sf_sn_skew <- function(eta) {
-    eta  <- eta / sqrt(1 + eta^2)
-    mu   <- eta * sqrt(2 / pi)
-    sig2 <- 1 - 2 * eta^2 / pi
-    skew <- (4 - pi) / 2 * (eta * sqrt(2 / pi))^3/((1 - 2*eta^2/pi)^1.5)
+sf_sn_skew <- function(eta, sigma = 1, mu = 0) {
+    w     <- sqrt(sigma^2 + eta^2)
+    delta <- eta / w
+    pi_2  <- 2 / pi
 
-    c(mu = mu, sig2 =  sig2, skew = skew)
+    mu    <- mu + w * delta * sqrt(pi_2)
+    sig2  <- w^2 * (1 - delta^2 *  pi_2)
+    skew <- (4 - pi) / 2 * (delta * sqrt(pi_2))^3
+    skew <- skew / ((1 - pi_2 * delta^2)^1.5)
+
+    c(mu   = mu,
+      sig2 = sig2,
+      skew = skew)
 }
 
 #' Get log likelihood from skewed normal
@@ -53,8 +59,13 @@ get_lm_coeff <- function(y, x) {
 #'
 #'
 #' @export
-get_lm_coeff_2 <- function(y, x) {
-    lrs <- lm(y ~ x)
+get_lm_coeff_2 <- function(y, x = NULL) {
+    if (is.null(x)) {
+        lrs <- lm(y ~ 1)
+    } else {
+        lrs <- lm(y ~ x)
+    }
+
     coefficients(lrs)
 }
 

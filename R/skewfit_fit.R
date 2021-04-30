@@ -64,17 +64,25 @@ sf_para_norm <- function(y, x, z) {
 #'
 #' @export
 #'
-sf_para_skew <- function(y, x, z, init_pa = NULL,
+sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
                          max_steps = 100000, tol = 1e-6) {
 
-    init_lm <- lm(y ~ z)
+    if (0 == usez)
+        init_lm <- lm(y ~ 1)
+    else
+        init_lm <- lm(y ~ z)
+
     if (is.null(init_pa)) {
         beta    <- coefficients(init_lm)
         beta    <- append(beta, 0, after = 1)
         init_pa <- c(beta, eta = 1, sig2 = 1)
     }
 
-    rst <- fit_para_skew(init_pa, y, x, z,
+    rst <- fit_para_skew(init_pa,
+                         y,
+                         x,
+                         z,
+                         usez,
                          max_steps = max_steps,
                          tol = tol)
     ## return
@@ -123,8 +131,11 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL,
 
     init_ai <- isoreg(y)$yf
     if (is.null(init_pa)) {
-        init_pa <- c(rep(0, ncol(z)), eta = 4, sig2 = 0.1,
-                     mode = max(x))
+        if (0 < usez)
+            init_pa <- rep(0, ncol(z))
+
+        init_pa <- c(init_pa,
+                     eta = 4, sig2 = 0.1, mode = max(x))
     }
 
     rst <- fit_iso_skew(init_pa, init_ai, y, x, z,

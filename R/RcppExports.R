@@ -29,8 +29,8 @@ cSlm <- function(y, x) {
 #'
 #' alpha(x) =  alpha * x where alpha > 0
 #' @export
-fit_para_skew <- function(init_pa, y, x, z, max_steps, tol) {
-    .Call(`_skewfit_fit_para_skew`, init_pa, y, x, z, max_steps, tol)
+fit_para_skew <- function(init_pa, y, x, z, usez, max_steps, tol) {
+    .Call(`_skewfit_fit_para_skew`, init_pa, y, x, z, usez, max_steps, tol)
 }
 
 #' Isotonic regression with Normal Error

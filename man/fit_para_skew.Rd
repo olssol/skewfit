@@ -4,7 +4,7 @@
 \alias{fit_para_skew}
 \title{Parametric alpha(x) with Skewed Error}
 \usage{
-fit_para_skew(init_pa, y, x, z, max_steps, tol)
+fit_para_skew(init_pa, y, x, z, usez, max_steps, tol)
 }
 \description{
 alpha(x) =  alpha * x where alpha > 0

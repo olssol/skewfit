@@ -4,7 +4,7 @@
 \alias{sf_para_skew}
 \title{Parametric model with Skew Normal Errors}
 \usage{
-sf_para_skew(y, x, z, init_pa = NULL, max_steps = 1e+05, tol = 1e-06)
+sf_para_skew(y, x, z, usez = 1, init_pa = NULL, max_steps = 1e+05, tol = 1e-06)
 }
 \description{
 Parametric model with Skew Normal errors with constraints on the slope of x

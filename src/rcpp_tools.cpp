@@ -157,12 +157,12 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 //' @export
 // [[Rcpp::export]]
 List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
-                   int max_steps, double tol) {
+                   int usez, int max_steps, double tol) {
 
   NumericVector pa = clone(init_pa);
   NumericVector last_pa(pa.size());
   int           n  = y.size(), nz = z.ncol();
-  NumericVector yeta(n), yzeta(n), beta(1+nz), alpha(1);
+  NumericVector yeta(n), yzeta(n), alpha(1);
   NumericMatrix ew(n, 2);
   NumericVector ai(n), ci(n);
 
@@ -174,6 +174,12 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
   double        tmp1, tmp2;
   int           inx = 0, i, j;
 
+  // ignore z
+  if (0 == usez) {
+    nz = 0;
+  }
+
+  NumericVector beta(1+nz);
 
   //initial ci
   for (i = 0; i < n; i++) {
@@ -194,7 +200,11 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
     }
 
     // get intercept and coeff for z
-    beta = coef(yeta, z);
+    if (0 < usez) {
+      beta = coef(yeta, z);
+    } else {
+      beta = coef(yeta);
+    }
 
     //get alpha
     for (i = 0; i < n; i++) {
@@ -218,6 +228,7 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
       for (j = 0; j < nz; j++) {
         tmp1 += beta[1+j] * z(i,j);
       }
+
       ci[i] = y[i] - tmp1;
     }
 
@@ -238,8 +249,8 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
     //return parameter
     pa[0] = beta[0];
     pa[1] = alpha[0];
-    for (i = 1; i < beta.size(); i++) {
-      pa[i+1] = beta[i];
+    for (j = 0; j < nz; j++) {
+      pa[j+1] = beta[j+1];
     }
     pa[2+nz] = eta;
     pa[3+nz] = sig2;
@@ -361,8 +372,8 @@ List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
 //' @export
 // [[Rcpp::export]]
 List fit_iso_skew(NumericVector pa, NumericVector ai,
-                  NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez,
-                  int max_steps, double tol) {
+                  NumericVector y, NumericVector x, NumericMatrix z, int unimodal,
+                  int usez, int max_steps, double tol) {
 
   NumericVector last_pa(pa.size());
   NumericVector last_ai(ai.size());
@@ -376,14 +387,18 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
   double        tmp1, tmp2;
   int           inx = 0, i, j;
 
+
+  // ignore z
+  if (0 == usez) {
+    nz = 0;
+  }
+
   //initial ci
   NumericVector ci(n);
   for (i = 0; i < n; i++) {
     tmp1 = 0;
-    if (0 < usez) {
-      for (j = 0; j < nz; j++) {
-        tmp1 += pa[j] * z(i,j);
-      }
+    for (j = 0; j < nz; j++) {
+      tmp1 += pa[j] * z(i,j);
     }
 
     ci[i] = y[i] - ai[i] - tmp1;
@@ -404,10 +419,9 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 
     for (i = 0; i < n; i++) {
       tmp1 = 0;
-      if (0 < usez) {
-        for (j = 0; j < nz; j++) {
-          tmp1 += beta[j] * z(i,j);
-        }
+
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[j] * z(i,j);
       }
 
       yzeta[i] = y[i] - tmp1 - pa[nz] * ew(i,0);
@@ -423,10 +437,8 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 
     for (i = 0; i < n; i++) {
       tmp1 = 0;
-      if (0 < usez) {
-        for (j = 0; j < nz; j++) {
-          tmp1 += beta[j] * z(i,j);
-        }
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[j] * z(i,j);
       }
 
       ci[i] = y[i] - ai[i] - tmp1;
