@@ -69,6 +69,21 @@ get_lm_coeff_2 <- function(y, x = NULL) {
     coefficients(lrs)
 }
 
+#'
+#'
+#' @export
+get_lm_coeff_3 <- function(y, x = NULL, z = NULL) {
+
+    if (is.null(x) & is.null(z)) {
+        lrs <- lm(y ~ 1)
+    } else {
+        xz  <- cbind(x, z)
+        lrs <- lm(y ~ xz)
+    }
+
+    coefficients(lrs)
+}
+
 
 #' Get bootstrap confidence interval
 #'

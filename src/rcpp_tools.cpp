@@ -158,8 +158,8 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 //' alpha(x) =  alpha * x where alpha > 0
 //' @export
 // [[Rcpp::export]]
-List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
-                   int usez, int max_steps, double tol) {
+List fit_para_skew_old(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
+                       int usez, int max_steps, double tol) {
 
   NumericVector pa = clone(init_pa);
   NumericVector last_pa(pa.size());
@@ -275,6 +275,123 @@ List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, Nume
 
   return(rst);
 }
+
+//' Parametric alpha(x) with Skewed Error
+//'
+//' alpha(x) =  alpha * x where alpha > 0
+//' @export
+// [[Rcpp::export]]
+List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
+                   int usez, int max_steps, double tol) {
+
+  NumericVector pa = clone(init_pa);
+  NumericVector last_pa(pa.size());
+
+  int           n  = y.size(), nz = z.ncol();
+  NumericVector yeta(n), yzeta(n);
+  NumericMatrix ew(n, 2);
+  NumericVector ai(n), ci(n);
+
+  Function      coef("get_lm_coeff_3");
+
+  List          rst(2);
+  double        eta, sig2, last_diff = 10000;
+  double        tmp1, tmp2;
+  int           inx = 0, i, j;
+
+  // ignore z
+  if (0 == usez) {
+    nz = 0;
+  }
+
+  NumericVector beta(2+nz);
+
+  //initial ci
+  for (i = 0; i < n; i++) {
+    tmp1 = pa[0] + pa[1] * x[i];
+    for (j = 0; j < nz; j++) {
+      tmp1 += pa[2+j] * z(i,j);
+    }
+
+    ci[i] = y[i] - tmp1;
+  }
+
+  while (inx < max_steps & last_diff > tol) {
+    last_pa = clone(pa);
+    ew      = cGetEw(ci, pa[2+nz], pa[3+nz]);
+
+    for (i = 0; i < n; i++) {
+      yeta[i] = y[i] - pa[2+nz] * ew(i,0);
+    }
+
+    // get intercept and coeff for x, z
+    if (0 < usez) {
+      beta = coef(yeta, x, z);
+    } else {
+      beta = coef(yeta, x);
+    }
+
+    // alpha * x: alpha > 0
+    if (beta[1] < 0)
+      beta[1] = 0;
+
+    //update ci
+    for (i = 0; i < n; i++) {
+      ai[i] = beta[0] + beta[1] * x[i];
+      tmp1  = ai[i];
+      for (j = 0; j < nz; j++) {
+        tmp1 += beta[2+j] * z(i,j);
+      }
+
+      ci[i] = y[i] - tmp1;
+    }
+
+    //update ew
+    ew = cGetEw(ci, pa[2+nz], pa[3+nz]);
+
+    // update eta and sigma2
+    tmp1 = 0;
+    tmp2 = 0;
+    for (i = 0; i < n; i++) {
+      tmp1 += ci[i] * ew(i,0);
+      tmp2 += ew(i,1);
+    }
+    eta = tmp1 / tmp2;
+
+    tmp1 = 0;
+    for (i = 0; i < n; i++) {
+      tmp1 += pow(ci[i], 2) + pow(eta, 2) * ew(i,1) - 2 * eta * ci[i] * ew(i,0);
+    }
+    sig2 = tmp1 / n;
+
+    //return parameter
+    pa[0] = beta[0];
+    pa[1] = beta[1];
+    for (j = 0; j < nz; j++) {
+      pa[j+2] = beta[j+2];
+    }
+    pa[2+nz] = eta;
+    pa[3+nz] = sig2;
+
+    last_diff = 0;
+    for (i = 0; i < pa.size(); i++) {
+      last_diff = fmax(last_diff, fabs(pa[i] - last_pa[i]));
+    }
+
+    inx++;
+  }
+
+  if (last_diff > tol) {
+    rst = List::create(NA_REAL, NA_REAL);
+  } else {
+    rst = List::create(_["mle_pa"]   = pa,
+                       _["mle_ai"]   = ai,
+                       _["residual"] = ci);
+  }
+
+  return(rst);
+}
+
 
 //' Isotonic regression with Normal Error
 //'
@@ -421,7 +538,6 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 
     for (i = 0; i < n; i++) {
       tmp1 = 0;
-
       for (j = 0; j < nz; j++) {
         tmp1 += beta[j] * z(i,j);
       }
@@ -446,6 +562,10 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
       ci[i] = y[i] - ai[i] - tmp1;
     }
 
+    // update ew
+    ew = cGetEw(ci, pa[nz], pa[nz+1]);
+
+    // update eta and sigma
     tmp1 = 0;
     tmp2 = 0;
     for (i = 0; i < n; i++) {

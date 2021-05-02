@@ -74,12 +74,13 @@ sf_para_norm <- function(y, x, z, ...) {
 sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
                          max_steps = 100000, tol = 1e-6, ...) {
 
-    if (0 == usez)
-        init_lm <- lm(y ~ 1)
-    else
-        init_lm <- lm(y ~ z)
 
     if (is.null(init_pa)) {
+        if (0 == usez)
+            init_lm <- lm(y ~ 1)
+        else
+            init_lm <- lm(y ~ z)
+
         beta0   <- coefficients(init_lm)
         beta    <- append(beta0, 0, after = 1)
         init_pa <- c(beta, eta = 1, sig2 = 1)
@@ -94,10 +95,10 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
                          max_steps = max_steps,
                          tol = tol)
     ## names
-    tmp <- NULL
+    tmp <- c("b0", "ax")
     if (0 < usez)
-        tmp <- paste("b", seq_len(ncol(z) + 1) - 1, sep = "")
-    tmp <- append(tmp, "ax", after = 1)
+        tmp <- c(tmp,
+                 paste("b", seq_len(ncol(z)), sep = ""))
     tmp <- c(tmp, "eta", "sig2")
 
     names(rst$mle_pa) <- tmp

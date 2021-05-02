@@ -29,6 +29,14 @@ cSlm <- function(y, x) {
 #'
 #' alpha(x) =  alpha * x where alpha > 0
 #' @export
+fit_para_skew_old <- function(init_pa, y, x, z, usez, max_steps, tol) {
+    .Call(`_skewfit_fit_para_skew_old`, init_pa, y, x, z, usez, max_steps, tol)
+}
+
+#' Parametric alpha(x) with Skewed Error
+#'
+#' alpha(x) =  alpha * x where alpha > 0
+#' @export
 fit_para_skew <- function(init_pa, y, x, z, usez, max_steps, tol) {
     .Call(`_skewfit_fit_para_skew`, init_pa, y, x, z, usez, max_steps, tol)
 }
