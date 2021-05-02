@@ -52,24 +52,26 @@ double apnorm(double u) {
 NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
   NumericMatrix rst(x.size(), 2);
 
-  double es  = pow(eta,2) + sig2;
+  double es  = pow(eta, 2) + sig2;
   double tau = sqrt(sig2/es);
-  double mu, ut, p, ew, ew2;
+  double mu, ut, tut, p, ew, ew2;
   int    i;
 
   for (i = 0; i < x.size(); i++) {
     mu  = eta * x[i] / es;
     ut  = - mu / tau;
 
-    if (ut < -4) {
-      ut = -4.0;
+    if (ut < -7) {
+      tut = -7.0;
     } else if (ut > 7) {
-      ut = 7.0;
+      tut = 7.0;
+    } else {
+      tut = ut;
     }
 
-    p   = R::dnorm(ut, 0, 1, 0) / (1 - R::pnorm(ut, 0, 1, 1, 0));
+    p   = R::dnorm(tut, 0, 1, 0) / (1 - R::pnorm(tut, 0, 1, 1, 0));
     ew  = mu + tau * p;
-    ew2 = pow(tau, 2) * (1 + ut * p - pow(p,2)) + pow(ew, 2);
+    ew2 = pow(tau, 2) * (1 + ut * p - pow(p, 2)) + pow(ew, 2);
 
     rst(i,0) = ew;
     rst(i,1) = ew2;

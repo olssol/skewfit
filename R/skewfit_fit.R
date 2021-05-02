@@ -2,7 +2,7 @@
 #'
 #' @export
 #'
-sf_para_norm <- function(y, x, z) {
+sf_para_norm <- function(y, x, z, ...) {
     ## residual
     f_res <- function(pars) {
         beta <- pars[- (1 : 2)]
@@ -53,6 +53,7 @@ sf_para_norm <- function(y, x, z) {
     rst$z <- z
     rst$y <- y
 
+    rst$method <- "sf_para_norm"
     class(rst) <- c("SKEWFIT", "PARA", "NORM")
 
     rst
@@ -65,7 +66,7 @@ sf_para_norm <- function(y, x, z) {
 #' @export
 #'
 sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
-                         max_steps = 100000, tol = 1e-6) {
+                         max_steps = 100000, tol = 1e-6, ...) {
 
     if (0 == usez)
         init_lm <- lm(y ~ 1)
@@ -90,6 +91,9 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
     rst$z <- z
     rst$y <- y
 
+    rst$init_pa <- init_pa
+    rst$method  <- "sf_para_skew"
+
     class(rst) <- c("SKEWFIT", "PARA", "SKEW")
     rst
 }
@@ -99,9 +103,12 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
 #'
 #' @export
 #'
-sf_iso_norm <- function(y, x, z, init_pa = NULL,
+sf_iso_norm <- function(y, x, z, init_pa = NULL, init_ai = NULL,
                         max_steps = 100000, tol = 1e-6, unimodel = 0) {
-    init_ai <- isoreg(y)$yf
+
+    if (is.null(init_ai))
+        init_ai <- isoreg(y)$yf
+
     if (is.null(init_pa)) {
         init_pa <- c(rep(0, ncol(z)), sig2 = 1, mode = max(x))
     }
@@ -117,6 +124,10 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL,
     rst$z <- z
     rst$y <- y
 
+    rst$init_ai <- init_ai
+    rst$init_pa <- init_pa
+    rst$method  <- "sf_iso_norm"
+
     class(rst) <- c("SKEWFIT", "ISO", "NORM")
     rst
 }
@@ -125,11 +136,13 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL,
 #'
 #' @export
 #'
-sf_iso_skew <- function(y, x, z, init_pa = NULL,
+sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
                         max_steps = 100000, tol = 1e-6,
                         unimodel = 0, usez = 1) {
 
-    init_ai <- isoreg(y)$yf
+    if (is.null(init_ai))
+        init_ai <- isoreg(y)$yf
+
     if (is.null(init_pa)) {
         if (0 < usez)
             init_pa <- rep(0, ncol(z))
@@ -148,7 +161,10 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL,
     rst$x <- x
     rst$z <- z
     rst$y <- y
+    rst$init_ai <- init_ai
+    rst$init_pa <- init_pa
+    rst$method  <- "sf_iso_skew"
+    class(rst)  <- c("SKEWFIT", "ISO", "SKEW")
 
-    class(rst) <- c("SKEWFIT", "ISO", "SKEW")
     rst
 }
