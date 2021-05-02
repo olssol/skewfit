@@ -4,7 +4,7 @@
 \alias{sf_para_norm}
 \title{Least square estimator with constraints on the slope of x}
 \usage{
-sf_para_norm(y, x, z)
+sf_para_norm(y, x, z, ...)
 }
 \description{
 Least square estimator with constraints on the slope of x

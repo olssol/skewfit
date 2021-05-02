@@ -9,9 +9,11 @@ sf_iso_norm(
   x,
   z,
   init_pa = NULL,
+  init_ai = NULL,
   max_steps = 1e+05,
   tol = 1e-06,
-  unimodel = 0
+  unimodel = 0,
+  usez = 1
 )
 }
 \description{
