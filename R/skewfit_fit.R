@@ -44,11 +44,17 @@ sf_para_norm <- function(y, x, z, ...) {
     residual <- f_res(mle_pa)
     sig2     <- var(residual)
 
-    rst <- list(mle_pa   = c(mle_pa, sig2 = sig2),
+    ## names
+    tmp           <- paste("b", seq_len(ncol(z) + 1) - 1, sep = "")
+    tmp           <- append(tmp, "ax", after = 1)
+    names(mle_pa) <- tmp
+    mle_pa        <- c(mle_pa, sig2 = sig2)
+
+    ## return
+    rst <- list(mle_pa   = mle_pa,
                 mle_ai   = mle_pa[1] + mle_pa[2] * x,
                 residual = residual)
 
-    ## return
     rst$x <- x
     rst$z <- z
     rst$y <- y
@@ -74,11 +80,12 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
         init_lm <- lm(y ~ z)
 
     if (is.null(init_pa)) {
-        beta    <- coefficients(init_lm)
-        beta    <- append(beta, 0, after = 1)
+        beta0   <- coefficients(init_lm)
+        beta    <- append(beta0, 0, after = 1)
         init_pa <- c(beta, eta = 1, sig2 = 1)
     }
 
+    ## fit
     rst <- fit_para_skew(init_pa,
                          y,
                          x,
@@ -86,6 +93,15 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
                          usez,
                          max_steps = max_steps,
                          tol = tol)
+    ## names
+    tmp <- NULL
+    if (0 < usez)
+        tmp <- paste("b", seq_len(ncol(z) + 1) - 1, sep = "")
+    tmp <- append(tmp, "ax", after = 1)
+    tmp <- c(tmp, "eta", "sig2")
+
+    names(rst$mle_pa) <- tmp
+
     ## return
     rst$x <- x
     rst$z <- z
@@ -104,12 +120,16 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
 #' @export
 #'
 sf_iso_norm <- function(y, x, z, init_pa = NULL, init_ai = NULL,
-                        max_steps = 100000, tol = 1e-6, unimodel = 0) {
+                        max_steps = 100000, tol = 1e-6, unimodel = 0,
+                        usez = 1) {
 
     if (is.null(init_ai))
         init_ai <- isoreg(y)$yf
 
     if (is.null(init_pa)) {
+        if (0 < usez) {
+            init_pa  <- rep(0, ncol(z))
+        }
         init_pa <- c(rep(0, ncol(z)), sig2 = 1, mode = max(x))
     }
 
@@ -118,6 +138,13 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL, init_ai = NULL,
                         unimodal  = unimodel,
                         max_steps = max_steps,
                         tol       = tol)
+
+    ## names
+    tmp <- NULL
+    if (0 < usez)
+        tmp <- paste("b", seq_len(ncol(z)), sep = "")
+    tmp <- c(tmp, "sig2", "mode")
+    names(rst$mle_pa) <- tmp
 
     ## return
     rst$x <- x
@@ -144,18 +171,28 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
         init_ai <- isoreg(y)$yf
 
     if (is.null(init_pa)) {
-        if (0 < usez)
+        if (0 < usez) {
             init_pa <- rep(0, ncol(z))
+        }
 
         init_pa <- c(init_pa,
                      eta = 4, sig2 = 0.1, mode = max(x))
     }
 
+    ## fit
     rst <- fit_iso_skew(init_pa, init_ai, y, x, z,
                         unimodal  = unimodel,
                         usez      = usez,
                         max_steps = max_steps,
                         tol       = tol)
+
+    ## names
+    tmp <- NULL
+    if (0 < usez)
+        tmp <- paste("b", seq_len(ncol(z)), sep = "")
+
+    tmp <- c(tmp, "eta", "sig2", "mode")
+    names(rst$mle_pa) <- tmp
 
     ## return
     rst$x <- x
