@@ -12,6 +12,7 @@ sf_iso_skew(
   init_ai = NULL,
   max_steps = 1e+05,
   tol = 1e-06,
+  n_init = 1,
   unimodel = 0,
   usez = 1
 )

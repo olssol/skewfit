@@ -563,7 +563,7 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
     }
 
     // update ew
-    ew = cGetEw(ci, pa[nz], pa[nz+1]);
+    // ew = cGetEw(ci, pa[nz], pa[nz+1]);
 
     // update eta and sigma
     tmp1 = 0;
