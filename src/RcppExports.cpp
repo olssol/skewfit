@@ -77,23 +77,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// fit_para_skew_old
-List fit_para_skew_old(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z, int usez, int max_steps, double tol);
-RcppExport SEXP _skewfit_fit_para_skew_old(SEXP init_paSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type init_pa(init_paSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type z(zSEXP);
-    Rcpp::traits::input_parameter< int >::type usez(usezSEXP);
-    Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
-    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_para_skew_old(init_pa, y, x, z, usez, max_steps, tol));
-    return rcpp_result_gen;
-END_RCPP
-}
 // fit_para_skew
 List fit_para_skew(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z, int usez, int max_steps, double tol);
 RcppExport SEXP _skewfit_fit_para_skew(SEXP init_paSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
@@ -243,7 +226,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_cSlm0", (DL_FUNC) &_skewfit_cSlm0, 2},
     {"_skewfit_cSlm1", (DL_FUNC) &_skewfit_cSlm1, 2},
     {"_skewfit_cSlm", (DL_FUNC) &_skewfit_cSlm, 2},
-    {"_skewfit_fit_para_skew_old", (DL_FUNC) &_skewfit_fit_para_skew_old, 7},
     {"_skewfit_fit_para_skew", (DL_FUNC) &_skewfit_fit_para_skew, 7},
     {"_skewfit_fit_iso_norm", (DL_FUNC) &_skewfit_fit_iso_norm, 8},
     {"_skewfit_fit_iso_skew", (DL_FUNC) &_skewfit_fit_iso_skew, 9},

@@ -71,7 +71,7 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
 
     p   = R::dnorm(tut, 0, 1, 0) / (1 - R::pnorm(tut, 0, 1, 1, 0));
     ew  = mu + tau * p;
-    ew2 = pow(tau, 2) * (1 + ut * p - pow(p, 2)) + pow(ew, 2);
+    ew2 = pow(tau, 2) * (1 + tut * p - pow(p, 2)) + pow(ew, 2);
 
     rst(i,0) = ew;
     rst(i,1) = ew2;
@@ -502,7 +502,7 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 
   List          fitrst(2), rst(2);
   double        mode, eta, sig2, last_diff = 10000;
-  double        tmp1, tmp2;
+  double        tmp1, tmp2, mu_c, var_c;
   int           inx = 0, i, j;
 
 
@@ -564,22 +564,28 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
     // update ew
     // ew = cGetEw(ci, pa[nz], pa[nz+1]);
 
-    // update eta and sigma
-    tmp1 = 0;
-    tmp2 = 0;
-    for (i = 0; i < n; i++) {
-      tmp1 += ci[i] * ew(i,0);
-      tmp2 += ew(i,1);
-    }
-    eta = tmp1 / tmp2;
+    // update eta and sigma by moment
+    mu_c  = mean(ci);
+    var_c = var(ci);
+    eta   = mu_c / sqrt(2.0 / M_PI);
+    sig2  = var_c - pow(eta, 2) *  (1 - 2.0 / M_PI);
 
-    tmp1 = 0;
-    for (i = 0; i < n; i++) {
-      tmp1 += pow(ci[i], 2);
-      tmp1 += pow(eta, 2) * ew(i,1);
-      tmp1 -= 2 * eta * ci[i] * ew(i,0);
-    }
-    sig2 = tmp1 / n;
+    // update eta and sigma by MLE
+    // tmp1 = 0;
+    // tmp2 = 0;
+    // for (i = 0; i < n; i++) {
+    //   tmp1 += ci[i] * ew(i,0);
+    //   tmp2 += ew(i,1);
+    // }
+    // eta = tmp1 / tmp2;
+
+    // tmp1 = 0;
+    // for (i = 0; i < n; i++) {
+    //   tmp1 += pow(ci[i], 2);
+    //   tmp1 += pow(eta, 2) * ew(i,1);
+    //   tmp1 -= 2 * eta * ci[i] * ew(i,0);
+    // }
+    // sig2 = tmp1 / n;
 
     //return parameter
     for (i = 0; i < nz; i++) {
