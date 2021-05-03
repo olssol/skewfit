@@ -165,7 +165,7 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL, init_ai = NULL,
 #' @export
 #'
 sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
-                        max_steps = 100000, tol = 1e-6,
+                        max_steps = 100000, tol = 1e-6, n_init = 1,
                         unimodel = 0, usez = 1) {
 
     if (is.null(init_ai))
@@ -181,11 +181,29 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
     }
 
     ## fit
-    rst <- fit_iso_skew(init_pa, init_ai, y, x, z,
-                        unimodal  = unimodel,
-                        usez      = usez,
-                        max_steps = max_steps,
-                        tol       = tol)
+    max_ll <- -Inf
+    for (j in 1:n_init) {
+        cur_rst <- fit_iso_skew(init_pa, init_ai, y, x, z,
+                                unimodal  = unimodel,
+                                usez      = usez,
+                                max_steps = max_steps,
+                                tol       = tol)
+
+        class(cur_rst) <- c("SKEWFIT", "ISO", "SKEW")
+
+        ## try different initial values
+        if (0 < usez)
+            init_pa[1:ncol(z)] <- init_pa[1:ncol(z)] + rnorm(ncol(z), sd = 1)
+
+        init_pa["eta"]  <- init_pa["eta"]  + rnorm(1, sd = 1)
+        init_pa["sig2"] <- init_pa["sig2"] + abs(rnorm(1, sd = 1))
+
+        ll <- sf_lpdf(cur_rst)
+        if (ll > max_ll) {
+            max_ll <- ll
+            rst    <- cur_rst
+        }
+    }
 
     ## names
     tmp <- NULL
