@@ -53,7 +53,7 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
   NumericMatrix rst(x.size(), 2);
 
   double es  = pow(eta, 2) + sig2;
-  double tau = sqrt(sig2/es);
+  double tau = sqrt(sig2 / es);
   double mu, ut, tut, p, ew, ew2;
   int    i;
 
@@ -61,9 +61,9 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
     mu  = eta * x[i] / es;
     ut  = - mu / tau;
 
-    if (ut < -7) {
+    if (ut < -7.0) {
       tut = -7.0;
-    } else if (ut > 7) {
+    } else if (ut > 7.0) {
       tut = 7.0;
     } else {
       tut = ut;
@@ -156,8 +156,6 @@ NumericVector cSlm(NumericVector y, NumericMatrix x) {
 //' Parametric alpha(x) with Skewed Error
 //'
 //' alpha(x) =  alpha * x where alpha > 0
-//' @export
-// [[Rcpp::export]]
 List fit_para_skew_old(NumericVector init_pa, NumericVector y, NumericVector x, NumericMatrix z,
                        int usez, int max_steps, double tol) {
 
@@ -462,8 +460,9 @@ List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
     pa[nz+1] = mode;
 
     last_diff = 0;
-    for (i = 0; i < nz+2; i++) {
-      last_diff = fmax(last_diff, fabs(pa[i] - last_pa[i]));
+    for (i = 0; i < pa.size(); i++) {
+      last_diff = fmax(last_diff,
+                       fabs(pa[i] - last_pa[i]));
     }
 
     for (i = 0; i < ai.size(); i++) {
@@ -576,7 +575,9 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
 
     tmp1 = 0;
     for (i = 0; i < n; i++) {
-      tmp1 += pow(ci[i], 2) + pow(eta, 2) * ew(i,1) - 2 * eta * ci[i] * ew(i,0);
+      tmp1 += pow(ci[i], 2);
+      tmp1 += pow(eta, 2) * ew(i,1);
+      tmp1 -= 2 * eta * ci[i] * ew(i,0);
     }
     sig2 = tmp1 / n;
 
@@ -590,12 +591,14 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
     pa[nz+2] = mode;
 
     last_diff = 0;
-    for (i = 0; i < nz+3; i++) {
-      last_diff = fmax(last_diff, fabs(pa[i] - last_pa[i]));
+    for (i = 0; i < pa.size(); i++) {
+      last_diff = fmax(last_diff,
+                       fabs(pa[i] - last_pa[i]));
     }
 
     for (i = 0; i < ai.size(); i++) {
-      last_diff = fmax(last_diff, fabs(ai[i] - last_ai[i]));
+      last_diff = fmax(last_diff,
+                       fabs(ai[i] - last_ai[i]));
     }
 
     inx++;
