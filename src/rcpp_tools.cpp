@@ -496,45 +496,48 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
   NumericVector last_pa(pa.size());
   NumericVector last_ai(ai.size());
 
+  int           inx = 0, i, j;
   int           n  = y.size(), nz = z.ncol();
-  NumericVector yaieta(n), yzeta(n), beta(nz);
+  NumericVector ci(n), yaieta(n), yzeta(n), beta(nz);
   NumericMatrix ew(n, 2);
+  double        mode, eta, sig2, last_diff = 10000;
+  double        tmp1, tmp2, var_c, mu_c;
 
   List          fitrst(2), rst(2);
-  double        mode, eta, sig2, last_diff = 10000;
-  double        tmp1, tmp2, mu_c, var_c;
-  int           inx = 0, i, j;
-
 
   // ignore z
   if (0 == usez) {
     nz = 0;
   }
 
-  //initial ci
-  NumericVector ci(n);
-  for (i = 0; i < n; i++) {
-    tmp1 = 0;
-    for (j = 0; j < nz; j++) {
-      tmp1 += pa[j] * z(i,j);
-    }
-
-    ci[i] = y[i] - ai[i] - tmp1;
-  }
-
   while(inx < max_steps & last_diff > tol) {
     last_pa = clone(pa);
     last_ai = clone(ai);
 
+    //update ci
+    for (i = 0; i < n; i++) {
+      tmp1 = 0;
+      for (j = 0; j < nz; j++) {
+        tmp1 += pa[j] * z(i,j);
+      }
+
+      ci[i] = y[i] - ai[i] - tmp1;
+    }
+
+    // get expectation
     ew = cGetEw(ci, pa[nz], pa[nz+1]);
+
+    // update beta
     for (i = 0; i < n; i++) {
       yaieta[i] = y[i] - ai[i] - pa[nz] * ew(i,0);
     }
 
+    // update beta
     if (0 < usez) {
       beta = cSlm(yaieta, z);
     }
 
+    // update alpha(x)
     for (i = 0; i < n; i++) {
       tmp1 = 0;
       for (j = 0; j < nz; j++) {
@@ -552,40 +555,31 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
       mode = pa[nz+2];
     }
 
+    // update eta by moment
+    // mu_c  = mean(ci);
+    // eta   = mu_c / sqrt(2.0 / M_PI);
+
+    // update eta by MLE
+    tmp1 = 0;
+    tmp2 = 0;
     for (i = 0; i < n; i++) {
-      tmp1 = 0;
-      for (j = 0; j < nz; j++) {
-        tmp1 += beta[j] * z(i,j);
-      }
-
-      ci[i] = y[i] - ai[i] - tmp1;
+      tmp1 += ci[i] * ew(i,0);
+      tmp2 += ew(i,1);
     }
+    eta = tmp1 / tmp2;
 
-    // update ew
-    // ew = cGetEw(ci, pa[nz], pa[nz+1]);
+    // update sigma by Moment
+    // var_c = var(ci);
+    // sig2  = var_c - pow(eta, 2) *  (1 - 2.0 / M_PI);
 
-    // update eta and sigma by moment
-    mu_c  = mean(ci);
-    var_c = var(ci);
-    eta   = mu_c / sqrt(2.0 / M_PI);
-    sig2  = var_c - pow(eta, 2) *  (1 - 2.0 / M_PI);
-
-    // update eta and sigma by MLE
-    // tmp1 = 0;
-    // tmp2 = 0;
-    // for (i = 0; i < n; i++) {
-    //   tmp1 += ci[i] * ew(i,0);
-    //   tmp2 += ew(i,1);
-    // }
-    // eta = tmp1 / tmp2;
-
-    // tmp1 = 0;
-    // for (i = 0; i < n; i++) {
-    //   tmp1 += pow(ci[i], 2);
-    //   tmp1 += pow(eta, 2) * ew(i,1);
-    //   tmp1 -= 2 * eta * ci[i] * ew(i,0);
-    // }
-    // sig2 = tmp1 / n;
+    // update sigma by MLE
+    tmp1 = 0;
+    for (i = 0; i < n; i++) {
+      tmp1 += pow(ci[i], 2);
+      tmp1 += pow(eta, 2) * ew(i,1);
+      tmp1 -= 2 * eta * ci[i] * ew(i,0);
+    }
+    sig2 = tmp1 / n;
 
     //return parameter
     for (i = 0; i < nz; i++) {
