@@ -54,24 +54,21 @@ NumericMatrix cGetEw(NumericVector x, double eta, double sig2) {
 
   double es  = pow(eta, 2) + sig2;
   double tau = sqrt(sig2 / es);
-  double mu, ut, tut, p, ew, ew2;
+  double mu, ut, p, ew, ew2;
   int    i;
 
   for (i = 0; i < x.size(); i++) {
     mu  = eta * x[i] / es;
     ut  = - mu / tau;
 
-    if (ut < -7.0) {
-      tut = -7.0;
-    } else if (ut > 7.0) {
-      tut = 7.0;
+    if (fabs(ut) > 4.0) {
+      p = 0;
     } else {
-      tut = ut;
+      p = R::dnorm(ut, 0, 1, 0) / (1 - R::pnorm(ut, 0, 1, 1, 0));
     }
 
-    p   = R::dnorm(tut, 0, 1, 0) / (1 - R::pnorm(tut, 0, 1, 1, 0));
     ew  = mu + tau * p;
-    ew2 = pow(tau, 2) * (1 + tut * p - pow(p, 2)) + pow(ew, 2);
+    ew2 = pow(tau, 2) * (1 + ut * p - pow(p, 2)) + pow(ew, 2);
 
     rst(i,0) = ew;
     rst(i,1) = ew2;
@@ -491,7 +488,7 @@ List fit_iso_norm(NumericVector init_pa, NumericVector init_ai,
 // [[Rcpp::export]]
 List fit_iso_skew(NumericVector pa, NumericVector ai,
                   NumericVector y, NumericVector x, NumericMatrix z, int unimodal,
-                  int usez, int max_steps, double tol) {
+                  int usez, int max_steps, double tol, double bound) {
 
   NumericVector last_pa(pa.size());
   NumericVector last_ai(ai.size());
@@ -579,7 +576,7 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
       tmp1 += pow(eta, 2) * ew(i,1);
       tmp1 -= 2 * eta * ci[i] * ew(i,0);
     }
-    sig2 = tmp1 / n;
+    sig2 = fmax(tmp1 / n, eta / bound);
 
     //return parameter
     for (i = 0; i < nz; i++) {
@@ -590,6 +587,7 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
     pa[nz+1] = sig2;
     pa[nz+2] = mode;
 
+    // check convergence
     last_diff = 0;
     for (i = 0; i < pa.size(); i++) {
       last_diff = fmax(last_diff,
@@ -604,6 +602,7 @@ List fit_iso_skew(NumericVector pa, NumericVector ai,
     inx++;
   }
 
+  // return
   if (last_diff > tol) {
     rst = List::create(NA_REAL, NA_REAL, NA_REAL);
   } else {

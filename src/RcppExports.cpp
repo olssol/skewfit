@@ -113,8 +113,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // fit_iso_skew
-List fit_iso_skew(NumericVector pa, NumericVector ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez, int max_steps, double tol);
-RcppExport SEXP _skewfit_fit_iso_skew(SEXP paSEXP, SEXP aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP) {
+List fit_iso_skew(NumericVector pa, NumericVector ai, NumericVector y, NumericVector x, NumericMatrix z, int unimodal, int usez, int max_steps, double tol, double bound);
+RcppExport SEXP _skewfit_fit_iso_skew(SEXP paSEXP, SEXP aiSEXP, SEXP ySEXP, SEXP xSEXP, SEXP zSEXP, SEXP unimodalSEXP, SEXP usezSEXP, SEXP max_stepsSEXP, SEXP tolSEXP, SEXP boundSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -127,7 +127,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type usez(usezSEXP);
     Rcpp::traits::input_parameter< int >::type max_steps(max_stepsSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(fit_iso_skew(pa, ai, y, x, z, unimodal, usez, max_steps, tol));
+    Rcpp::traits::input_parameter< double >::type bound(boundSEXP);
+    rcpp_result_gen = Rcpp::wrap(fit_iso_skew(pa, ai, y, x, z, unimodal, usez, max_steps, tol, bound));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -228,7 +229,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_skewfit_cSlm", (DL_FUNC) &_skewfit_cSlm, 2},
     {"_skewfit_fit_para_skew", (DL_FUNC) &_skewfit_fit_para_skew, 7},
     {"_skewfit_fit_iso_norm", (DL_FUNC) &_skewfit_fit_iso_norm, 8},
-    {"_skewfit_fit_iso_skew", (DL_FUNC) &_skewfit_fit_iso_skew, 9},
+    {"_skewfit_fit_iso_skew", (DL_FUNC) &_skewfit_fit_iso_skew, 10},
     {"_skewfit_get_kernel", (DL_FUNC) &_skewfit_get_kernel, 1},
     {"_skewfit_get_kernel_fn", (DL_FUNC) &_skewfit_get_kernel_fn, 4},
     {"_skewfit_pred_iso", (DL_FUNC) &_skewfit_pred_iso, 4},

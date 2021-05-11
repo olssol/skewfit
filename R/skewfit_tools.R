@@ -232,3 +232,16 @@ get_single_bs <- function(rst_fit,
     ## return
     rst
 }
+
+
+## get sigma
+get_skew_sigma <- function(residual, eta, ...) {
+    eobj <- function(sig) {
+        ll <- sf_sn_lpdf(residual, eta, sig)
+        -ll
+    }
+
+    rst  <- optimize(eobj, lower = 0, upper = 20, ...)
+    sig2 <- rst$minimum^2
+    sig2
+}

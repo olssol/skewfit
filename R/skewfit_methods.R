@@ -287,8 +287,8 @@ plot.BOOTSTRAP <- function(object, ci = TRUE, true_ax = NULL, ...) {
         bs_ci <- sf_bs_ci(object)
         bs_ci <- bs_ci[inx, ]
 
-        data$ci_lb <- bs_ci$ci_lb
-        data$ci_ub <- bs_ci$ci_ub
+        data$ci_lb <- bs_ci$adj_lb
+        data$ci_ub <- bs_ci$adj_ub
     }
 
     if (inherits(object, "ISO")) {

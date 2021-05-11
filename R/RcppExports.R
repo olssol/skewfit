@@ -48,8 +48,8 @@ fit_iso_norm <- function(init_pa, init_ai, y, x, z, unimodal, max_steps, tol) {
 #' Isotonic regression with Skewed Error
 #'
 #' @export
-fit_iso_skew <- function(pa, ai, y, x, z, unimodal, usez, max_steps, tol) {
-    .Call(`_skewfit_fit_iso_skew`, pa, ai, y, x, z, unimodal, usez, max_steps, tol)
+fit_iso_skew <- function(pa, ai, y, x, z, unimodal, usez, max_steps, tol, bound) {
+    .Call(`_skewfit_fit_iso_skew`, pa, ai, y, x, z, unimodal, usez, max_steps, tol, bound)
 }
 
 #' Kernel Function

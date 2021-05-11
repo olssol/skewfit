@@ -166,7 +166,7 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL, init_ai = NULL,
 #'
 sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
                         max_steps = 100000, tol = 1e-6, n_init = 1,
-                        unimodel = 0, usez = 1) {
+                        unimodel = 0, usez = 1, bound = 20) {
 
     if (is.null(init_ai))
         init_ai <- isoreg(y)$yf
@@ -187,9 +187,10 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
                                 unimodal  = unimodel,
                                 usez      = usez,
                                 max_steps = max_steps,
-                                tol       = tol)
+                                tol       = tol,
+                                bound     = bound)
 
-        class(cur_rst) <- c("SKEWFIT", "ISO", "SKEW")
+        class(cur_rst) <- c("SKEW")
 
         ## try different initial values
         if (0 < usez)
@@ -212,6 +213,15 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
 
     tmp <- c(tmp, "eta", "sig2", "mode")
     names(rst$mle_pa) <- tmp
+
+    ## fix sig2
+    if (0) {
+        sig2 <- get_skew_sigma(rst$residual,
+                               rst$mle_pa["eta"],
+                               tol = tol)
+
+        rst$mle_pa["sig2"] <- sig2
+    }
 
     ## return
     rst$x <- x
