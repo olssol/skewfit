@@ -4,7 +4,7 @@
 \alias{fit_iso_skew}
 \title{Isotonic regression with Skewed Error}
 \usage{
-fit_iso_skew(pa, ai, y, x, z, unimodal, usez, max_steps, tol)
+fit_iso_skew(pa, ai, y, x, z, unimodal, usez, max_steps, tol, bound)
 }
 \description{
 Isotonic regression with Skewed Error

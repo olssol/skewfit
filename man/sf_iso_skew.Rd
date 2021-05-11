@@ -14,7 +14,8 @@ sf_iso_skew(
   tol = 1e-06,
   n_init = 1,
   unimodel = 0,
-  usez = 1
+  usez = 1,
+  bound = 20
 )
 }
 \description{

@@ -206,6 +206,9 @@ sf_lpdf.SKEW <- function(object, ...) {
     residual <- object$residual
     pa       <- object$mle_pa
 
+    if (is.null(pa))
+        return(-Inf)
+
     sf_sn_lpdf(residual,
                 eta   = pa["eta"],
                 sigma = sqrt(pa["sig2"]))

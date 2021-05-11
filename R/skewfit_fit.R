@@ -165,7 +165,7 @@ sf_iso_norm <- function(y, x, z, init_pa = NULL, init_ai = NULL,
 #' @export
 #'
 sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
-                        max_steps = 100000, tol = 1e-6, n_init = 1,
+                        max_steps = 10000, tol = 1e-6, n_init = 1,
                         unimodel = 0, usez = 1, bound = 20) {
 
     if (is.null(init_ai))
@@ -182,7 +182,8 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
 
     ## fit
     max_ll <- -Inf
-    for (j in 1:n_init) {
+    j      <- 1
+    while (j <= n_init) {
         cur_rst <- fit_iso_skew(init_pa, init_ai, y, x, z,
                                 unimodal  = unimodel,
                                 usez      = usez,
@@ -200,27 +201,22 @@ sf_iso_skew <- function(y, x, z, init_pa = NULL, init_ai = NULL,
         init_pa["sig2"] <- init_pa["sig2"] + abs(rnorm(1, sd = 1))
 
         ll <- sf_lpdf(cur_rst)
-        if (ll > max_ll) {
+        if (1 == j | ll > max_ll) {
             max_ll <- ll
             rst    <- cur_rst
         }
+
+        j <- j + 1
     }
 
     ## names
-    tmp <- NULL
-    if (0 < usez)
-        tmp <- paste("b", seq_len(ncol(z)), sep = "")
+    if (!is.null(rst$mle_pa)) {
+        tmp <- NULL
+        if (0 < usez)
+            tmp <- paste("b", seq_len(ncol(z)), sep = "")
 
-    tmp <- c(tmp, "eta", "sig2", "mode")
-    names(rst$mle_pa) <- tmp
-
-    ## fix sig2
-    if (0) {
-        sig2 <- get_skew_sigma(rst$residual,
-                               rst$mle_pa["eta"],
-                               tol = tol)
-
-        rst$mle_pa["sig2"] <- sig2
+        tmp <- c(tmp, "eta", "sig2", "mode")
+        names(rst$mle_pa) <- tmp
     }
 
     ## return
