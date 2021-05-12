@@ -95,13 +95,15 @@ sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
                          max_steps = max_steps,
                          tol = tol)
     ## names
-    tmp <- c("b0", "ax")
-    if (0 < usez)
-        tmp <- c(tmp,
-                 paste("b", seq_len(ncol(z)), sep = ""))
-    tmp <- c(tmp, "eta", "sig2")
+    if (!is.null(rst$mle_pa)) {
+        tmp <- c("b0", "ax")
+        if (0 < usez)
+            tmp <- c(tmp,
+                     paste("b", seq_len(ncol(z)), sep = ""))
+        tmp <- c(tmp, "eta", "sig2")
 
-    names(rst$mle_pa) <- tmp
+        names(rst$mle_pa) <- tmp
+    }
 
     ## return
     rst$x <- x
