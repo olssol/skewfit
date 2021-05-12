@@ -72,7 +72,7 @@ sf_para_norm <- function(y, x, z, ...) {
 #' @export
 #'
 sf_para_skew <- function(y, x, z, usez = 1, init_pa = NULL,
-                         max_steps = 100000, tol = 1e-6, ...) {
+                         max_steps = 10000, tol = 1e-6, ...) {
 
 
     if (is.null(init_pa)) {
