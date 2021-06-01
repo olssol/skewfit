@@ -10,7 +10,7 @@ sf_para_skew(
   z,
   usez = 1,
   init_pa = NULL,
-  max_steps = 1e+05,
+  max_steps = 10000,
   tol = 1e-06,
   ...
 )
